@@ -1,0 +1,27 @@
+{
+  "name": "aimbot",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "Roblox",
+    "Nevermore",
+    "Lua"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@quenty/attributeutils": "^14.18.0",
+    "@quenty/binder": "^14.21.0",
+    "@quenty/characterutils": "^12.19.0",
+    "@quenty/clienttranslator": "^14.20.0",
+    "@quenty/cmdrservice": "^13.24.0",
+    "@quenty/genericscreenguiprovider": "^13.22.0",
+    "@quenty/highlight": "^10.22.0",
+    "@quenty/loader": "^10.9.0",
+    "@quenty/ragdoll": "^15.25.0",
+    "@quenty/raycaster": "^3.5.0",
+    "@quenty/servicebag": "^11.13.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
