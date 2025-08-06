@@ -3,19 +3,21 @@ local require = require(script.Parent.loader).load(script)
 local AmmoUIClient = {}
 AmmoUIClient.ServiceName = "AmmoUIClient"
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
+local ScreenGuiProvider = require("ScreenGuiProvider")
+local GunServiceClient = require("GunServiceClient")
 local Maid = require("Maid")
 local Blend = require("Blend")
 
-function AmmoUIClient:Init(ServiceBag)
+function AmmoUIClient.Init(self: ClientTypes.AmmoUIClient, serviceBag: _ServiceBag.ServiceBag)
 	-- Private
 	self._maid = Maid.new()
-	self._screenGuiProvider = ServiceBag:GetService(require("ScreenGuiProvider"))
-	self._gunServiceClient = ServiceBag:GetService(require("GunServiceClient"))
-
-	-- Public
+	self._screenGuiProvider = serviceBag:GetService(ScreenGuiProvider)
+	self._gunServiceClient = serviceBag:GetService(GunServiceClient)
 end
 
-function AmmoUIClient:Start()
+function AmmoUIClient.Start(self: ClientTypes.AmmoUIClient)
 	local screenGui = self._screenGuiProvider:Get("AMMO")
 	screenGui.IgnoreGuiInset = true
 
@@ -34,7 +36,7 @@ function AmmoUIClient:Start()
 	}):Subscribe())
 end
 
-function AmmoUIClient:Destroy()
+function AmmoUIClient.Destroy(self: ClientTypes.AmmoUIClient)
 	self._maid:DoCleaning()
 end
 

@@ -3,23 +3,26 @@ local require = require(script.Parent.loader).load(script)
 local EliminationServiceClient = {}
 EliminationServiceClient.ServiceName = "EliminationServiceClient"
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
+local GunServiceClient = require("GunServiceClient")
+local ScreenGuiProvider = require("ScreenGuiProvider")
 local Maid = require("Maid")
 local AttributeUtils = require("AttributeUtils")
 local Blend = require("Blend")
 local ObservableList = require("ObservableList")
-local Rx = require("Rx")
 local Promise = require("Promise")
 local RxBrioUtils = require("RxBrioUtils")
 
-function EliminationServiceClient:Init(ServiceBag)
+function EliminationServiceClient.Init(self: ClientTypes.EliminationServiceClient, serviceBag: _ServiceBag.ServiceBag)
 	self._maid = Maid.new()
 
-	self._gunServiceClient = ServiceBag:GetService(require("GunServiceClient"))
-	self._screenGuiProvider = ServiceBag:GetService(require("ScreenGuiProvider"))
+	self._gunServiceClient = serviceBag:GetService(GunServiceClient)
+	self._screenGuiProvider = serviceBag:GetService(ScreenGuiProvider)
 	self._eliminationsObservableList = ObservableList.new()
 end
 
-function EliminationServiceClient:Start()
+function EliminationServiceClient.Start(self: ClientTypes.EliminationServiceClient)
 	self._maid:Add(self._gunServiceClient.playerHitSignal:Connect(function(data)
 		local health: number = AttributeUtils.getAttribute(data.playerHit, "health", 0)
 		if health - self._gunServiceClient.damagePerBullet.Value > 0 then
@@ -66,7 +69,7 @@ function EliminationServiceClient:Start()
 	}):Subscribe())
 end
 
-function EliminationServiceClient:Destroy()
+function EliminationServiceClient.Destroy(self: ClientTypes.EliminationServiceClient)
 	self._maid:DoCleaning()
 end
 

@@ -3,6 +3,8 @@ local require = require(script.Parent.loader).load(script)
 local GunService = {}
 GunService.ServiceName = "GunService"
 
+local _ServiceBag = require("ServiceBag")
+local ServerTypes = require("ServerTypes")
 local Maid = require("Maid")
 local CharacterUtils = require("CharacterUtils")
 local PromiseGetRemoteEvent = require("PromiseGetRemoteEvent")
@@ -10,7 +12,7 @@ local Signal = require("Signal")
 
 local REMOTE_EVENT_NAME: string = "GunController"
 
-function GunService:Init(ServiceBag)
+function GunService.Init(self: ServerTypes.GunService, ServiceBag: _ServiceBag.ServiceBag)
 	-- Private
 	self._maid = Maid.new()
 	self._activePlayersService = ServiceBag:GetService(require("ActivePlayersService"))
@@ -20,10 +22,14 @@ function GunService:Init(ServiceBag)
 	self.playerHitSignal = self._maid:Add(Signal.new())
 end
 
-function GunService:Start()
+function GunService.Start(self: ServerTypes.GunService)
 	self._remoteEventPromise:Then(function(remoteEvent: RemoteEvent)
-		self._maid:Add(remoteEvent.OnServerEvent:Connect(function(player, message, data)
+		self._maid:Add(remoteEvent.OnServerEvent:Connect(function(player: Player, message: string, data)
 			if message == "shoot" then
+				-- Hit player has forcefield
+				if self._activePlayersService.activePlayers[data.playerHit].forcefield then
+					return
+				end
 				local playerHitRoot: Part? = CharacterUtils.getPlayerRootPart(data.playerHit)
 				if not playerHitRoot then
 					return
@@ -41,7 +47,7 @@ function GunService:Start()
 	end)
 end
 
-function GunService:Destroy()
+function GunService.Destroy(self: ServerTypes.GunService)
 	self._maid:DoCleaning()
 end
 

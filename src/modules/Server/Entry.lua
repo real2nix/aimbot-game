@@ -22,6 +22,7 @@ function Entry:Init(serviceBag: _ServiceBag.ServiceBag)
 	self._serviceBag:GetService(require("ActivePlayersService"))
 	self._serviceBag:GetService(require("GunService"))
 	self._serviceBag:GetService(require("DeathService"))
+	self._serviceBag:GetService(require("SpawnPlayerService"))
 	self._serviceBag:GetService(require("DamageDirectionIndicatorService"))
 end
 

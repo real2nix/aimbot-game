@@ -5,22 +5,25 @@ DeathServiceClient.ServiceName = "DeathServiceClient"
 
 local Players = game:GetService("Players")
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
+local CrosshairServiceClient = require("CrosshairServiceClient")
 local Maid = require("Maid")
 local Signal = require("Signal")
 local Promise = require("Promise")
 
 local REMOTE_EVENT_NAME: string = "PLAYER_KILLED"
 
-function DeathServiceClient:Init(ServiceBag)
+function DeathServiceClient.Init(self: ClientTypes.DeathServiceClient, ServiceBag: _ServiceBag.ServiceBag)
 	-- Private
 	self._maid = Maid.new()
-	self._crosshairServiceClient = ServiceBag:GetService(require("CrosshairServiceClient"))
+	self._crosshairServiceClient = ServiceBag:GetService(CrosshairServiceClient)
 
 	-- Public
 	self.clientDiedSignal = Signal.new()
 end
 
-function DeathServiceClient:Start()
+function DeathServiceClient.Start(self: ClientTypes.DeathServiceClient)
 	self._maid:Add(self.clientDiedSignal:Connect(function()
 		self._crosshairServiceClient.crosshairEnabled:SetValue(false)
 		Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
@@ -34,7 +37,7 @@ function DeathServiceClient:Start()
 	end))
 end
 
-function DeathServiceClient:Destroy()
+function DeathServiceClient.Destroy(self: ClientTypes.DeathServiceClient)
 	self._maid:DoCleaning()
 end
 

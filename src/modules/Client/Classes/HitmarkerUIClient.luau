@@ -4,20 +4,22 @@ local HitmarkerUIClient = {}
 HitmarkerUIClient.ClassName = "HitmarkerUIClient"
 HitmarkerUIClient.__index = HitmarkerUIClient
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
+local ScreenGuiProvider = require("ScreenGuiProvider")
 local Maid = require("Maid")
 local Blend = require("Blend")
-local Promise = require("Promise")
 local SpringObject = require("SpringObject")
 local Rx = require("Rx")
 
 local WIDTH: number = 2
 local HEIGHT: number = 10
 
-function HitmarkerUIClient.new(ServiceBag)
+function HitmarkerUIClient.new(serviceBag: _ServiceBag.ServiceBag): ClientTypes.HitmarkerUIClient
 	local self = setmetatable({}, HitmarkerUIClient)
 
 	self._maid = Maid.new()
-	self._screenGuiProvider = ServiceBag:GetService(require("ScreenGuiProvider"))
+	self._screenGuiProvider = serviceBag:GetService(ScreenGuiProvider)
 
 	local screenGui: ScreenGui = self._maid:Add(self._screenGuiProvider:Get("HITMARKER"))
 	screenGui.IgnoreGuiInset = true
@@ -82,7 +84,7 @@ function HitmarkerUIClient.new(ServiceBag)
 	return self
 end
 
-function HitmarkerUIClient:Destroy()
+function HitmarkerUIClient.Destroy(self: ClientTypes.HitmarkerUIClient)
 	self._maid:DoCleaning()
 end
 

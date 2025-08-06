@@ -5,23 +5,28 @@ ActivePlayersServiceClient.ServiceName = "ActivePlayersServiceClient"
 
 local REMOTE_EVENT_NAME = "ActivePlayers"
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
+local PlayerClassClient = require("PlayerClassClient")
 local PromiseGetRemoteEvent = require("PromiseGetRemoteEvent")
 local ObservableSet = require("ObservableSet")
 local Maid = require("Maid")
-local PlayerClassClient = require("PlayerClassClient")
 
-function ActivePlayersServiceClient:Init(ServiceBag)
+function ActivePlayersServiceClient.Init(
+	self: ClientTypes.ActivePlayersServiceClient,
+	ServiceBag: _ServiceBag.ServiceBag
+)
 	self._maid = Maid.new()
 
 	self._serviceBag = ServiceBag
-	self._remoteEvent = PromiseGetRemoteEvent(REMOTE_EVENT_NAME)
+	self._remoteEventPromise = PromiseGetRemoteEvent(REMOTE_EVENT_NAME)
 
 	self.activePlayers = ObservableSet.new()
 	self.playerObjects = {}
 end
 
-function ActivePlayersServiceClient:Start()
-	self._maid:Add(self._remoteEvent:Then(function(remote)
+function ActivePlayersServiceClient.Start(self: ClientTypes.ActivePlayersServiceClient)
+	self._maid:Add(self._remoteEventPromise:Then(function(remote)
 		self._maid:Add(remote.OnClientEvent:Connect(function(message: string, players)
 			if message == "init" then
 				for _, player in players do
@@ -44,7 +49,7 @@ function ActivePlayersServiceClient:Start()
 	end))
 end
 
-function ActivePlayersServiceClient:Destroy()
+function ActivePlayersServiceClient.Destroy(self: ClientTypes.ActivePlayersServiceClient)
 	self._maid:DoCleaning()
 end
 

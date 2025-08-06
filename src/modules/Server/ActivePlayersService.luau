@@ -5,47 +5,55 @@ ActivePlayersService.ServiceName = "ActivePlayersService"
 
 local Players = game:GetService("Players")
 
+local _ServiceBag = require("ServiceBag")
+local ServerTypes = require("ServerTypes")
+local PlayerClass = require("PlayerClass")
 local Maid = require("Maid")
 local GetRemoteEvent = require("GetRemoteEvent")
-local PlayerClass = require("PlayerClass")
 local Table = require("Table")
+local Signal = require("Signal")
 
 local REMOTE_EVENT_NAME = "ActivePlayers"
 
-function ActivePlayersService:Init(ServiceBag)
+function ActivePlayersService.Init(self: ServerTypes.ActivePlayersService, serviceBag: _ServiceBag.ServiceBag)
 	-- Private
 	self._maid = Maid.new()
-	self._serviceBag = ServiceBag
+	self._serviceBag = serviceBag
 	self._remoteEvent = GetRemoteEvent(REMOTE_EVENT_NAME)
 
 	-- Public
 	self.activePlayers = {}
+	self.playerAdded = self._maid:Add(Signal.new())
+	self.playerRemoved = self._maid:Add(Signal.new())
 end
 
-function ActivePlayersService:Start()
-	self._maid:Add(Players.PlayerAdded:Connect(function(playerAdded: Player)
-		local playerObject = PlayerClass.new(self._serviceBag, playerAdded)
+function ActivePlayersService.Start(self: ServerTypes.ActivePlayersService)
+	self._maid:Add(Players.PlayerAdded:Connect(function(player: Player)
+		local playerObject = PlayerClass.new(self._serviceBag, player)
 
 		-- Pass new player all the active players
-		self._remoteEvent:FireClient(playerAdded, "init", Table.keys(self.activePlayers))
+		self._remoteEvent:FireClient(player, "init", Table.keys(self.activePlayers))
 
-		-- Pass players the newly added player
-		self.activePlayers[playerAdded] = playerObject
-		for _, player in Players:GetPlayers() do
-			if player == playerAdded then
+		self.activePlayers[player] = playerObject
+		self.playerAdded:Fire(player)
+
+		-- Pass other players the newly added player
+		for _, otherPlayer in Players:GetPlayers() do
+			if otherPlayer == player then
 				continue
 			end
-			self._remoteEvent:FireClient(player, "add", { playerAdded })
+			self._remoteEvent:FireClient(player, "add", { player })
 		end
 	end))
 
-	self._maid:Add(Players.PlayerRemoving:Connect(function(playerRemoved: Player)
-		self.activePlayers[playerRemoved] = nil
-		self._remoteEvent:FireAllClients("remove", { playerRemoved })
+	self._maid:Add(Players.PlayerRemoving:Connect(function(player: Player)
+		self.activePlayers[player] = nil
+		self.playerRemoved:Fire(player)
+		self._remoteEvent:FireAllClients("remove", { player })
 	end))
 end
 
-function ActivePlayersService:Destroy()
+function ActivePlayersService.Destroy(self: ServerTypes.ActivePlayersService)
 	self._maid:DoCleaning()
 end
 

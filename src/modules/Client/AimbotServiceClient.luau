@@ -6,14 +6,16 @@ AimbotServiceClient.ServiceName = "AimbotServiceClient"
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
 local Maid = require("Maid")
 local CharacterUtils = require("CharacterUtils")
 local CharacterPromiseUtils = require("CharacterPromiseUtils")
 local AttributeUtils = require("AttributeUtils")
 
-local Camera = workspace.CurrentCamera
+local Camera: Camera = workspace.CurrentCamera
 
-function AimbotServiceClient:Init(ServiceBag)
+function AimbotServiceClient.Init(self: ClientTypes.AimbotServiceClient, ServiceBag: _ServiceBag.ServiceBag)
 	self._maid = Maid.new()
 	self._aimbotMaid = self._maid:Add(Maid.new())
 
@@ -24,10 +26,10 @@ function AimbotServiceClient:Init(ServiceBag)
 	self._params.FilterType = Enum.RaycastFilterType.Exclude
 end
 
-function AimbotServiceClient:Start()
+function AimbotServiceClient.Start(self: ClientTypes.AimbotServiceClient)
 	self._maid:Add(self._gunServiceClient.state.Changed:Connect(function(value: string)
 		if value == "shooting" then
-			self._aimbotMaid:Add(RunService.PreRender:Connect(function(deltaTime: number)
+			self._aimbotMaid:Add(RunService.PreRender:Connect(function()
 				local closestPlayer: Player?, rootPart = self:_getClosestPlayer()
 				if not closestPlayer then
 					return
@@ -43,17 +45,17 @@ function AimbotServiceClient:Start()
 	end))
 end
 
-function AimbotServiceClient:Destroy()
+function AimbotServiceClient.Destroy(self: ClientTypes.AimbotServiceClient)
 	self._maid:DoCleaning()
 end
 
-function AimbotServiceClient:_getClosestPlayer(): Player?
-	for player in self._activePlayersServiceClient.activePlayers do
+function AimbotServiceClient._getClosestPlayer(self: ClientTypes.AimbotServiceClient): Player?
+	for _, player: Player in self._activePlayersServiceClient.activePlayers:GetList() do
 		local health: number = AttributeUtils.getAttribute(player, "health", 0)
 		if health == 0 then
 			continue
 		end
-		local character: Model = player.Character
+		local character: Model? = player.Character
 		if not character then
 			continue
 		end

@@ -4,19 +4,19 @@ local DamageMarkerClient = {}
 DamageMarkerClient.ClassName = "DamageUIClient"
 DamageMarkerClient.__index = DamageMarkerClient
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
 local Maid = require("Maid")
 local Blend = require("Blend")
 local SpringObject = require("SpringObject")
 local Promise = require("Promise")
 
-local Camera = workspace.CurrentCamera
-
-function DamageMarkerClient.new(ServiceBag, data)
+function DamageMarkerClient.new(serviceBag: _ServiceBag.ServiceBag, data): ClientTypes.DamageMarkerClient
 	local self = setmetatable({}, DamageMarkerClient)
 
 	self._maid = Maid.new()
-	self._gunServiceClient = ServiceBag:GetService(require("GunServiceClient"))
-	self._highlightServiceClient = ServiceBag:GetService(require("HighlightServiceClient"))
+	self._gunServiceClient = serviceBag:GetService(require("GunServiceClient"))
+	self._highlightServiceClient = serviceBag:GetService(require("HighlightServiceClient"))
 
 	local transparencySpring = self._maid:Add(SpringObject.new(1, 10, 2))
 	transparencySpring:SetPosition(0)
@@ -72,7 +72,7 @@ function DamageMarkerClient.new(ServiceBag, data)
 	return self
 end
 
-function DamageMarkerClient:Destroy()
+function DamageMarkerClient.Destroy(self: ClientTypes.DamageMarkerClient)
 	self._maid:DoCleaning()
 end
 

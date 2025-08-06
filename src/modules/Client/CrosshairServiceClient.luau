@@ -5,6 +5,9 @@ CrosshairServiceClient.ServiceName = "CrosshairServiceClient"
 
 local UserInputService: UserInputService = game:GetService("UserInputService")
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
+local ScreenGuiProvider = require("ScreenGuiProvider")
 local Maid = require("Maid")
 local Blend = require("Blend")
 local ValueObject = require("ValueObject")
@@ -12,19 +15,19 @@ local ValueObject = require("ValueObject")
 local WIDTH: number = 2
 local HEIGHT: number = 6
 
-function CrosshairServiceClient:Init(ServiceBag)
+function CrosshairServiceClient.Init(self: ClientTypes.CrosshairServiceClient, ServiceBag: _ServiceBag.ServiceBag)
 	-- Private
 	self._maid = Maid.new()
-	self._screenGuiProvider = ServiceBag:GetService(require("ScreenGuiProvider"))
+	self._screenGuiProvider = ServiceBag:GetService(ScreenGuiProvider)
 
 	-- Public
 	self.crosshairEnabled = self._maid:Add(ValueObject.new(true, "boolean"))
 end
 
-function CrosshairServiceClient:Start()
+function CrosshairServiceClient.Start(self: ClientTypes.CrosshairServiceClient)
 	UserInputService.MouseIconEnabled = not self.crosshairEnabled:Observe()
 
-	local screenGui = self._screenGuiProvider:Get("CROSSHAIR")
+	local screenGui: ScreenGui = self._screenGuiProvider:Get("CROSSHAIR")
 	screenGui.IgnoreGuiInset = true
 
 	self._maid:Add(Blend.New("Frame")({
@@ -62,7 +65,7 @@ function CrosshairServiceClient:Start()
 	}):Subscribe())
 end
 
-function CrosshairServiceClient:Destroy()
+function CrosshairServiceClient.Destroy(self: ClientTypes.CrosshairServiceClient)
 	self._maid:DoCleaning()
 end
 

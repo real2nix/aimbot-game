@@ -4,13 +4,15 @@ local ObjectHitParticlesClient = {}
 ObjectHitParticlesClient.ClassName = "ObjectHitParticlesClient"
 ObjectHitParticlesClient.__index = ObjectHitParticlesClient
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
 local Maid = require("Maid")
 local Blend = require("Blend")
 local Promise = require("Promise")
 
 local WIDTH: number = 0.25
 
-function ObjectHitParticlesClient.new(ServiceBag, data)
+function ObjectHitParticlesClient.new(_serviceBag: _ServiceBag.ServiceBag, data): ClientTypes.ObjectHitParticlesClient
 	local self = setmetatable({}, ObjectHitParticlesClient)
 
 	self._maid = Maid.new()
@@ -25,11 +27,11 @@ function ObjectHitParticlesClient.new(ServiceBag, data)
 	return self
 end
 
-function ObjectHitParticlesClient:Destroy()
+function ObjectHitParticlesClient.Destroy(self: ClientTypes.ObjectHitParticlesClient)
 	self._maid:DoCleaning()
 end
 
-function ObjectHitParticlesClient:_addBulletHole(data)
+function ObjectHitParticlesClient._addBulletHole(self: ClientTypes.ObjectHitParticlesClient, data)
 	local cframe: CFrame = CFrame.new(data.position, data.position + data.normal)
 	self._maid:Add(Blend.New("Part")({
 		Name = "BulletHole",
@@ -42,7 +44,7 @@ function ObjectHitParticlesClient:_addBulletHole(data)
 	}):Subscribe())
 end
 
-function ObjectHitParticlesClient:_addParticle(data)
+function ObjectHitParticlesClient._addParticle(self: ClientTypes.ObjectHitParticlesClient, data)
 	local cframe: CFrame = CFrame.new(data.position, data.position + data.bulletUnitVector)
 	self._maid:Add(Blend.New("Part")({
 		Name = "Particles",

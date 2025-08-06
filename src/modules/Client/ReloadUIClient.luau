@@ -3,20 +3,24 @@ local require = require(script.Parent.loader).load(script)
 local ReloadUIClient = {}
 ReloadUIClient.ServiceName = "ReloadUIClient"
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
 local Maid = require("Maid")
 local Blend = require("Blend")
 local Rx = require("Rx")
 local ValueObject = require("ValueObject")
+local ScreenGuiProvider = require("ScreenGuiProvider")
+local GunServiceClient = require("GunServiceClient")
 
-function ReloadUIClient:Init(ServiceBag)
+function ReloadUIClient.Init(self: ClientTypes.ReloadUIClient, ServiceBag: _ServiceBag.ServiceBag)
 	-- Private
 	self._maid = Maid.new()
-	self._screenGuiProvider = ServiceBag:GetService(require("ScreenGuiProvider"))
-	self._gunServiceClient = ServiceBag:GetService(require("GunServiceClient"))
+	self._screenGuiProvider = ServiceBag:GetService(ScreenGuiProvider)
+	self._gunServiceClient = ServiceBag:GetService(GunServiceClient)
 	self._countValue = ValueObject.new(0, "number")
 end
 
-function ReloadUIClient:Start()
+function ReloadUIClient.Start(self: ClientTypes.ReloadUIClient)
 	self._gunServiceClient.reloadSignal:Connect(function()
 		self._countValue:SetValue(self._gunServiceClient.reloadSeconds.Value)
 		for i = self._countValue.Value * 10, 0, -1 do
@@ -48,7 +52,7 @@ function ReloadUIClient:Start()
 	}):Subscribe()
 end
 
-function ReloadUIClient:Destroy()
+function ReloadUIClient.Destroy(self: ClientTypes.ReloadUIClient)
 	self._maid:DoCleaning()
 end
 

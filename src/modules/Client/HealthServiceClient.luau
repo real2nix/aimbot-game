@@ -5,26 +5,24 @@ HealthServiceClient.ServiceName = "HealthServiceClient"
 
 local Players = game:GetService("Players")
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
 local Maid = require("Maid")
 local Blend = require("Blend")
 local ValueObject = require("ValueObject")
-local Promise = require("Promise")
 local RxAttributeUtils = require("RxAttributeUtils")
-local CharacterUtils = require("CharacterUtils")
 
-local Camera = workspace.CurrentCamera
-
-function HealthServiceClient:Init(ServiceBag)
+function HealthServiceClient.Init(self: ClientTypes.HealthServiceClient, serviceBag: _ServiceBag.ServiceBag)
 	self._maid = Maid.new()
 
-	self._screenGuiProvider = ServiceBag:GetService(require("ScreenGuiProvider"))
-	self._crosshairServiceClient = ServiceBag:GetService(require("CrosshairServiceClient"))
-	self._deathServiceClient = ServiceBag:GetService(require("DeathServiceClient"))
+	self._screenGuiProvider = serviceBag:GetService(require("ScreenGuiProvider"))
+	self._crosshairServiceClient = serviceBag:GetService(require("CrosshairServiceClient"))
+	self._deathServiceClient = serviceBag:GetService(require("DeathServiceClient"))
 
 	self.health = ValueObject.new(150, "number")
 end
 
-function HealthServiceClient:Start()
+function HealthServiceClient.Start(self: ClientTypes.HealthServiceClient)
 	self._maid:Add(RxAttributeUtils.observeAttribute(Players.LocalPlayer, "health"):Subscribe(function(newValue: number)
 		if newValue == 0 then
 			self._deathServiceClient.clientDiedSignal:Fire()
@@ -61,7 +59,7 @@ function HealthServiceClient:Start()
 	}):Subscribe())
 end
 
-function HealthServiceClient:Destroy()
+function HealthServiceClient.Destroy(self: ClientTypes.HealthServiceClient)
 	self._maid:DoCleaning()
 end
 

@@ -7,19 +7,25 @@ PlayerClassClient.__index = PlayerClassClient
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
+local HighlightServiceClient = require("HighlightServiceClient")
+local ScreenGuiProvider = require("ScreenGuiProvider")
 local Blend = require("Blend")
 local Maid = require("Maid")
 local CharacterPromiseUtils = require("CharacterPromiseUtils")
 local CharacterUtils = require("CharacterUtils")
 local AttributeUtils = require("AttributeUtils")
+local RxAttributeUtils = require("RxAttributeUtils")
 local Rx = require("Rx")
 
-function PlayerClassClient.new(ServiceBag, player)
+function PlayerClassClient.new(ServiceBag: _ServiceBag.ServiceBag, player): ClientTypes.PlayerClassClient
 	local self = setmetatable({}, PlayerClassClient)
 
 	self._maid = Maid.new()
-	self._highlightServiceClient = ServiceBag:GetService(require("HighlightServiceClient"))
-	self._screenGuiProvider = ServiceBag:GetService(require("ScreenGuiProvider"))
+	self._highlightServiceClient = ServiceBag:GetService(HighlightServiceClient)
+	self._screenGuiProvider = ServiceBag:GetService(ScreenGuiProvider)
+	self._forcefieldObject = nil
 
 	CharacterPromiseUtils.promiseCharacter(player):Then(function(character: Model)
 		self._animatedHighlightModel = self._highlightServiceClient:Highlight(character, 1)
@@ -194,10 +200,17 @@ function PlayerClassClient.new(ServiceBag, player)
 		end
 	end))
 
+	self._maid:Add(RxAttributeUtils.observeAttribute(player, "forcefield"):Subscribe(function(forcefieldValue: boolean)
+		-- animate in if true,
+		local transparency: number = if forcefieldValue == true then 0.2 else 1
+
+		-- animate out if false
+	end))
+
 	return self
 end
 
-function PlayerClassClient:Destroy()
+function PlayerClassClient.Destroy(self: ClientTypes.PlayerClassClient)
 	self._maid:DoCleaning()
 end
 

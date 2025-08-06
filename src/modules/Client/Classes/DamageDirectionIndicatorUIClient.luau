@@ -6,6 +6,9 @@ DamageDirectionIndicatorUIClient.__index = DamageDirectionIndicatorUIClient
 
 local RunService = game:GetService("RunService")
 
+local _ServiceBag = require("ServiceBag")
+local ClientTypes = require("ClientTypes")
+local ScreenGuiProvider = require("ScreenGuiProvider")
 local Maid = require("Maid")
 local Blend = require("Blend")
 local ValueObject = require("ValueObject")
@@ -13,11 +16,14 @@ local SpringObject = require("SpringObject")
 
 local Camera = workspace.CurrentCamera
 
-function DamageDirectionIndicatorUIClient.new(ServiceBag, shooterPosition: Vector3)
+function DamageDirectionIndicatorUIClient.new(
+	serviceBag: _ServiceBag.ServiceBag,
+	shooterPosition: Vector3
+): ClientTypes.DamageDirectionIndicatorUIClient
 	local self = setmetatable({}, DamageDirectionIndicatorUIClient)
 
 	self._maid = Maid.new()
-	self._screenGuiProvider = ServiceBag:GetService(require("ScreenGuiProvider"))
+	self._screenGuiProvider = serviceBag:GetService(ScreenGuiProvider)
 	self._angleDegrees = self._maid:Add(ValueObject.new(0, "number"))
 
 	local transparencySpring = self._maid:Add(SpringObject.new(1, 5))
@@ -35,8 +41,8 @@ function DamageDirectionIndicatorUIClient.new(ServiceBag, shooterPosition: Vecto
 		local flatCFrame = CFrame.lookAt(
 			Camera.CFrame.Position,
 			Camera.CFrame.Position + Camera.CFrame.LookVector * Vector3.new(1, 0, 1)
-		) -- basically just creates a cframe that has the position of your character's rootpart and the rotation of the camera WITHOUT the up/down rotation
-		local travel = flatCFrame:Inverse() * shooterPosition -- find the travel distance from the flatCFrame to the enemy position (cf:inverse() * v3 is equivalent to cf:PointToObjectSpace(v3))
+		)
+		local travel = flatCFrame:Inverse() * shooterPosition
 		local rot = math.atan2(travel.Z, travel.X)
 		self._angleDegrees:SetValue(math.deg(rot) + 90)
 	end
@@ -64,7 +70,7 @@ function DamageDirectionIndicatorUIClient.new(ServiceBag, shooterPosition: Vecto
 	return self
 end
 
-function DamageDirectionIndicatorUIClient:Destroy()
+function DamageDirectionIndicatorUIClient.Destroy(self: ClientTypes.DamageDirectionIndicatorUIClient)
 	self._maid:DoCleaning()
 end
 
