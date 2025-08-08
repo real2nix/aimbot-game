@@ -31,30 +31,19 @@ function HealthServiceClient.Start(self: ClientTypes.HealthServiceClient)
 	end))
 
 	self._maid:Add(Blend.New("Frame")({
-		Size = UDim2.new(0.5, 0, 0, 15),
+		Size = UDim2.fromScale(0.5, 0.02),
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, -15),
+		BackgroundColor3 = Color3.fromRGB(94, 94, 94),
 		Parent = self._screenGuiProvider:Get("HEALTH"),
 
-		Blend.New("UICorner")({}),
 		Blend.New("Frame")({
-			Size = UDim2.new(1, -4, 1, -4),
+			Size = Blend.Computed(self.health, function(health: number)
+				return UDim2.fromScale(health / 150, 1)
+			end),
 			BackgroundColor3 = Color3.fromRGB(84, 255, 10),
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
-			Blend.New("UICorner")({}),
-
-			Blend.New("TextLabel")({
-				Text = Blend.Computed(self.health, function(val)
-					return val .. " / 150"
-				end),
-				AnchorPoint = Vector2.new(1, 1),
-				Position = UDim2.new(1, 0, 1, -2),
-				Size = UDim2.new(1, 0, 1, -5),
-				TextXAlignment = Enum.TextXAlignment.Right,
-				Font = Enum.Font.FredokaOne,
-				BackgroundTransparency = 1,
-			}),
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.fromScale(0, 0.5),
 		}),
 	}):Subscribe())
 end

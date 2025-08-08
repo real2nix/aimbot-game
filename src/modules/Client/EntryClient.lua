@@ -28,6 +28,7 @@ function EntryClient:Init(serviceBag: _ServiceBag.ServiceBag)
 	self._serviceBag:GetService(require("HitmarkerServiceClient"))
 	self._serviceBag:GetService(require("ObjectHitServiceClient"))
 	self._serviceBag:GetService(require("EliminationServiceClient"))
+	self._serviceBag:GetService(require("GunModelControllerClient"))
 end
 
 return EntryClient

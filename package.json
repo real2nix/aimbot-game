@@ -9,6 +9,8 @@
   ],
   "license": "UNLICENSED",
   "dependencies": {
+    "@jsdotlua/react": "^17.2.1",
+    "@jsdotlua/react-roblox": "^17.2.1",
     "@quenty/attributeutils": "^14.18.0",
     "@quenty/binder": "^14.21.0",
     "@quenty/characterutils": "^12.19.0",

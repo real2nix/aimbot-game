@@ -8,6 +8,7 @@ local ValueObject = require("ValueObject")
 local ObservableSet = require("ObservableSet")
 local ObservableList = require("ObservableList")
 local GenericScreenGuiProvider = require("GenericScreenGuiProvider")
+local Brio = require("Brio")
 
 export type ActivePlayersServiceClient = {
 	_maid: Maid.Maid,
@@ -28,8 +29,6 @@ export type AimbotServiceClient = {
 
 export type AmmoUIClient = {
 	_maid: Maid.Maid,
-	_screenGuiProvider: ScreenGuiProvider,
-	_gunServiceClient: GunServiceClient,
 }
 
 export type CrosshairServiceClient = {
@@ -63,6 +62,13 @@ export type EnvironmentSoundsServiceClient = {
 
 export type GunModelControllerClient = {
 	_maid: Maid.Maid,
+	_gunServiceClient: GunServiceClient,
+	_swayAmount: number,
+	_swaySpeed: number,
+	_bobAmount: number,
+	_bobSpeed: number,
+	_bobTime: number,
+	_lastMouseDelta: Vector2,
 }
 
 export type GunServiceClient = {
@@ -77,6 +83,7 @@ export type GunServiceClient = {
 	reloadSeconds: ValueObject.ValueObject<number>,
 	shootCooldownSeconds: ValueObject.ValueObject<number>,
 	damagePerBullet: ValueObject.ValueObject<number>,
+	gunModel: Model,
 
 	reloadSignal: Signal.Signal<()>,
 	playerHitSignal: Signal.Signal<any>,

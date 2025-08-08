@@ -3,6 +3,7 @@ local require = require(script.Parent.loader).load(script)
 local GunServiceClient = {}
 GunServiceClient.ServiceName = "GunServiceClient"
 
+local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
@@ -21,6 +22,8 @@ local AttributeUtils = require("AttributeUtils")
 
 local Camera = workspace.CurrentCamera
 
+type state = "unavailable" | "ready" | "shooting" | "reloading"
+
 local REMOTE_EVENT_NAME: string = "GunController"
 
 function GunServiceClient.Init(self: ClientTypes.GunServiceClient, ServiceBag: _ServiceBag.ServiceBag)
@@ -30,25 +33,17 @@ function GunServiceClient.Init(self: ClientTypes.GunServiceClient, ServiceBag: _
 	self._aimbotServiceClient = ServiceBag:GetService(require("AimbotServiceClient"))
 	self._remoteEventPromise = PromiseGetRemoteEvent(REMOTE_EVENT_NAME)
 
-	--[[
-	States:
-	unavailable
-	ready
-	shooting
-	reloading
+	self.state = self._maid:Add(ValueObject.new("ready", "string"))
+	self.maxAmmo = self._maid:Add(ValueObject.new(20, "number"))
+	self.ammo = self._maid:Add(ValueObject.new(self.maxAmmo.Value, "number"))
+	self.reloadSeconds = self._maid:Add(ValueObject.new(1, "number"))
+	self.shootCooldownSeconds = self._maid:Add(ValueObject.new(0.115, "number"))
+	self.damagePerBullet = self._maid:Add(ValueObject.new(20, "number"))
+	self.gunModel = Workspace.Model
 
-    should probably use something better than valueobject ??
-	]]
-	self.state = ValueObject.new("ready", "string")
-	self.maxAmmo = ValueObject.new(20, "number")
-	self.ammo = ValueObject.new(self.maxAmmo.Value, "number")
-	self.reloadSeconds = ValueObject.new(1, "number")
-	self.shootCooldownSeconds = ValueObject.new(0.115, "number")
-	self.damagePerBullet = ValueObject.new(20, "number")
-
-	self.reloadSignal = Signal.new()
-	self.playerHitSignal = Signal.new()
-	self.objectHitSignal = Signal.new()
+	self.reloadSignal = self._maid:Add(Signal.new())
+	self.playerHitSignal = self._maid:Add(Signal.new())
+	self.objectHitSignal = self._maid:Add(Signal.new())
 end
 
 function GunServiceClient.Start(self: ClientTypes.GunServiceClient)
