@@ -4,14 +4,12 @@ local DamageMarkerClient = {}
 DamageMarkerClient.ClassName = "DamageUIClient"
 DamageMarkerClient.__index = DamageMarkerClient
 
-local _ServiceBag = require("ServiceBag")
-local ClientTypes = require("ClientTypes")
 local Maid = require("Maid")
 local Blend = require("Blend")
 local SpringObject = require("SpringObject")
 local Promise = require("Promise")
 
-function DamageMarkerClient.new(serviceBag: _ServiceBag.ServiceBag, data): ClientTypes.DamageMarkerClient
+function DamageMarkerClient.new(serviceBag, data)
 	local self = setmetatable({}, DamageMarkerClient)
 
 	self._maid = Maid.new()
@@ -72,7 +70,7 @@ function DamageMarkerClient.new(serviceBag: _ServiceBag.ServiceBag, data): Clien
 	return self
 end
 
-function DamageMarkerClient.Destroy(self: ClientTypes.DamageMarkerClient)
+function DamageMarkerClient.Destroy(self)
 	self._maid:DoCleaning()
 end
 

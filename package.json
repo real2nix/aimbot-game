@@ -16,6 +16,7 @@
     "@quenty/characterutils": "^12.19.0",
     "@quenty/clienttranslator": "^14.20.0",
     "@quenty/cmdrservice": "^13.24.0",
+    "@quenty/color3utils": "^11.19.0",
     "@quenty/genericscreenguiprovider": "^13.22.0",
     "@quenty/highlight": "^10.22.0",
     "@quenty/loader": "^10.9.0",

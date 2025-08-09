@@ -4,15 +4,13 @@ local ObjectHitParticlesClient = {}
 ObjectHitParticlesClient.ClassName = "ObjectHitParticlesClient"
 ObjectHitParticlesClient.__index = ObjectHitParticlesClient
 
-local _ServiceBag = require("ServiceBag")
-local ClientTypes = require("ClientTypes")
 local Maid = require("Maid")
 local Blend = require("Blend")
 local Promise = require("Promise")
 
 local WIDTH: number = 0.25
 
-function ObjectHitParticlesClient.new(_serviceBag: _ServiceBag.ServiceBag, data): ClientTypes.ObjectHitParticlesClient
+function ObjectHitParticlesClient.new(serviceBag, data)
 	local self = setmetatable({}, ObjectHitParticlesClient)
 
 	self._maid = Maid.new()

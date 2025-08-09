@@ -17,6 +17,11 @@
         "$path": "src/scripts/Server"
       }
     },
+    "ReplicatedStorage":{
+        "react-lua" : {
+            "$path" : "react-lua"
+        }
+    },
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "AimbotScripts": {

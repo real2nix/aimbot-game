@@ -4,8 +4,6 @@ local HitmarkerUIClient = {}
 HitmarkerUIClient.ClassName = "HitmarkerUIClient"
 HitmarkerUIClient.__index = HitmarkerUIClient
 
-local _ServiceBag = require("ServiceBag")
-local ClientTypes = require("ClientTypes")
 local ScreenGuiProvider = require("ScreenGuiProvider")
 local Maid = require("Maid")
 local Blend = require("Blend")
@@ -15,7 +13,7 @@ local Rx = require("Rx")
 local WIDTH: number = 2
 local HEIGHT: number = 10
 
-function HitmarkerUIClient.new(serviceBag: _ServiceBag.ServiceBag): ClientTypes.HitmarkerUIClient
+function HitmarkerUIClient.new(serviceBag): ClientTypes.HitmarkerUIClient
 	local self = setmetatable({}, HitmarkerUIClient)
 
 	self._maid = Maid.new()

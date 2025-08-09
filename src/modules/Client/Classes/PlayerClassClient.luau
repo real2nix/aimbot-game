@@ -7,8 +7,6 @@ PlayerClassClient.__index = PlayerClassClient
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
-local _ServiceBag = require("ServiceBag")
-local ClientTypes = require("ClientTypes")
 local HighlightServiceClient = require("HighlightServiceClient")
 local ScreenGuiProvider = require("ScreenGuiProvider")
 local Blend = require("Blend")
@@ -19,12 +17,12 @@ local AttributeUtils = require("AttributeUtils")
 local RxAttributeUtils = require("RxAttributeUtils")
 local Rx = require("Rx")
 
-function PlayerClassClient.new(ServiceBag: _ServiceBag.ServiceBag, player): ClientTypes.PlayerClassClient
+function PlayerClassClient.new(serviceBag, player)
 	local self = setmetatable({}, PlayerClassClient)
 
 	self._maid = Maid.new()
-	self._highlightServiceClient = ServiceBag:GetService(HighlightServiceClient)
-	self._screenGuiProvider = ServiceBag:GetService(ScreenGuiProvider)
+	self._highlightServiceClient = serviceBag:GetService(HighlightServiceClient)
+	self._screenGuiProvider = serviceBag:GetService(ScreenGuiProvider)
 	self._forcefieldObject = nil
 
 	CharacterPromiseUtils.promiseCharacter(player):Then(function(character: Model)
@@ -210,7 +208,7 @@ function PlayerClassClient.new(ServiceBag: _ServiceBag.ServiceBag, player): Clie
 	return self
 end
 
-function PlayerClassClient.Destroy(self: ClientTypes.PlayerClassClient)
+function PlayerClassClient.Destroy(self)
 	self._maid:DoCleaning()
 end
 

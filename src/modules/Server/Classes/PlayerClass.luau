@@ -4,8 +4,6 @@ local PlayerClass = {}
 PlayerClass.ClassName = "PlayerClass"
 PlayerClass.__index = PlayerClass
 
-local _ServiceBag = require("ServiceBag")
-local ServerTypes = require("ServerTypes")
 local Maid = require("Maid")
 local CharacterPromiseUtils = require("CharacterPromiseUtils")
 local CharacterUtils = require("CharacterUtils")
@@ -23,7 +21,7 @@ local function _makePlayerCharacterBlocky(player: Player)
 	humanoid:ApplyDescription(currentDescription)
 end
 
-function PlayerClass.new(serviceBag: _ServiceBag.ServiceBag, player: Player): ServerTypes.PlayerClass
+function PlayerClass.new(serviceBag, player: Player)
 	local self = setmetatable({}, PlayerClass)
 
 	-- Private
@@ -43,7 +41,7 @@ function PlayerClass.new(serviceBag: _ServiceBag.ServiceBag, player: Player): Se
 	return self
 end
 
-function PlayerClass.Destroy(self: ServerTypes.PlayerClass)
+function PlayerClass.Destroy(self)
 	self._maid:DoCleaning()
 end
 

@@ -6,8 +6,6 @@ DamageDirectionIndicatorUIClient.__index = DamageDirectionIndicatorUIClient
 
 local RunService = game:GetService("RunService")
 
-local _ServiceBag = require("ServiceBag")
-local ClientTypes = require("ClientTypes")
 local ScreenGuiProvider = require("ScreenGuiProvider")
 local Maid = require("Maid")
 local Blend = require("Blend")
@@ -16,10 +14,7 @@ local SpringObject = require("SpringObject")
 
 local Camera = workspace.CurrentCamera
 
-function DamageDirectionIndicatorUIClient.new(
-	serviceBag: _ServiceBag.ServiceBag,
-	shooterPosition: Vector3
-): ClientTypes.DamageDirectionIndicatorUIClient
+function DamageDirectionIndicatorUIClient.new(serviceBag, shooterPosition: Vector3)
 	local self = setmetatable({}, DamageDirectionIndicatorUIClient)
 
 	self._maid = Maid.new()
@@ -70,7 +65,7 @@ function DamageDirectionIndicatorUIClient.new(
 	return self
 end
 
-function DamageDirectionIndicatorUIClient.Destroy(self: ClientTypes.DamageDirectionIndicatorUIClient)
+function DamageDirectionIndicatorUIClient.Destroy(self)
 	self._maid:DoCleaning()
 end
 
