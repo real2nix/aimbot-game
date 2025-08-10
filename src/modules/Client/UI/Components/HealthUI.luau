@@ -20,9 +20,9 @@ function HealthUI.Init(self, serviceBag)
 end
 
 local function healthBar(props)
-	local health, setHealth = React.useState(props.healthServiceClient.health.Value)
+	local health, setHealth = React.useState(props._healthServiceClient.health.Value)
 	React.useEffect(function()
-		local connection = props.healthServiceClient.health.Changed:Connect(function(value)
+		local connection = props._healthServiceClient.health.Changed:Connect(function(value)
 			setHealth(value)
 		end)
 		return function()
@@ -37,7 +37,32 @@ local function healthBar(props)
 			(150 - health) / 150
 		),
 		BorderSizePixel = 0,
-	}, { React.createElement("UICorner") })
+	}, {
+		React.createElement("UICorner"),
+	})
+end
+
+local function healthNumber(props)
+	local health, setHealth = React.useState(props._healthServiceClient.health.Value)
+	React.useEffect(function()
+		local connection = props._healthServiceClient.health.Changed:Connect(function(value)
+			setHealth(value)
+		end)
+		return function()
+			connection:Disconnect()
+		end
+	end, {})
+	return React.createElement("TextLabel", {
+		Size = UDim2.fromScale(1, 0.8),
+		Position = UDim2.new(0, 10, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		Font = Enum.Font.GothamBold,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Text = `{health} / 150`,
+		BackgroundTransparency = 1,
+		TextScaled = true,
+	})
 end
 
 local function backboard(props)
@@ -47,14 +72,18 @@ local function backboard(props)
 		Position = UDim2.new(0.5, 0, 1, -15),
 		BackgroundColor3 = Color3.fromRGB(94, 94, 94),
 		BorderSizePixel = 0,
-	}, { healthBar(props), React.createElement("UICorner") })
+	}, {
+		React.createElement(healthBar, props),
+		React.createElement(healthNumber, props),
+		React.createElement("UICorner"),
+	})
 end
 
 function HealthUI.Start(self)
 	local handle = self._screenGuiProvider:Get("HEALTH")
 	handle.IgnoreGuiInset = true
 	self._root = ReactRoblox.createRoot(handle)
-	self._root:render(React.createElement(backboard, { healthServiceClient = self._healthServiceClient }))
+	self._root:render(React.createElement(backboard, { _healthServiceClient = self._healthServiceClient }))
 end
 
 function HealthUI.Destroy(self)

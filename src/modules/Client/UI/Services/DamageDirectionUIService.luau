@@ -50,11 +50,7 @@ local function damageDirectionsContainer()
 		})
 	end
 
-	return React.createElement(
-		"Frame",
-		{ BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Name = "QWE" },
-		children
-	)
+	return React.createElement("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, children)
 end
 
 function DamageDirectionUIService.Init(self, serviceBag)

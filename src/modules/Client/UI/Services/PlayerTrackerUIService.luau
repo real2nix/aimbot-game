@@ -52,7 +52,7 @@ local function playerTrackerContainer(props)
 	end, {})
 
 	local children = {}
-	for player, data in activePlayers do
+	for _, data in activePlayers do
 		table.insert(
 			children,
 			React.createElement("Frame", {

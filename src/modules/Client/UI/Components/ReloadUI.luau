@@ -50,9 +50,9 @@ local function ReloadCountdown(props)
 	end
 
 	return React.createElement("TextLabel", {
-		Size = UDim2.fromScale(1, 0.035),
+		Size = UDim2.new(1, 0, 0, 20),
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.525, 0.525),
+		Position = UDim2.new(0.5, 20, 0.5, 15),
 		BackgroundTransparency = 1,
 		TextScaled = true,
 		TextColor3 = Color3.new(1, 1, 1),

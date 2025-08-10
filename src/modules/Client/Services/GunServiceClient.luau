@@ -39,6 +39,8 @@ function GunServiceClient.Init(self, serviceBag)
 	self.gunModel = Workspace.Model
 
 	self.reloadSignal = self._maid:Add(Signal.new())
+	self.startShootingSignal = self._maid:Add(Signal.new())
+	self.stopShootingSignal = self._maid:Add(Signal.new())
 	self.playerHitSignal = self._maid:Add(Signal.new())
 	self.objectHitSignal = self._maid:Add(Signal.new())
 end
@@ -47,13 +49,13 @@ function GunServiceClient.Start(self)
 	self._maid:Add(UserInputService.InputBegan:Connect(function(input)
 		if self.state.Value == "ready" then
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				self:_startShooting()
+				self.startShootingSignal:Fire()
 			elseif input.KeyCode == Enum.KeyCode.R then
-				self:_reload()
+				self.reloadSignal:Fire()
 			end
 		elseif self.state.Value == "shooting" then
 			if input.KeyCode == Enum.KeyCode.R then
-				self:_reload()
+				self.reloadSignal:Fire()
 			end
 		end
 	end))
@@ -61,9 +63,19 @@ function GunServiceClient.Start(self)
 	self._maid:Add(UserInputService.InputEnded:Connect(function(input)
 		if self.state.Value == "shooting" then
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				self.state:SetValue("ready")
+				self.stopShootingSignal:Fire()
 			end
 		end
+	end))
+
+	self._maid:Add(self.startShootingSignal:Connect(function()
+		self:_startShooting()
+	end))
+	self._maid:Add(self.stopShootingSignal:Connect(function()
+		self:_stopShooting()
+	end))
+	self._maid:Add(self.reloadSignal:Connect(function()
+		self:_reload()
 	end))
 end
 
@@ -76,7 +88,6 @@ function GunServiceClient._reload(self)
 		return
 	end
 	self.state:SetValue("reloading")
-	self.reloadSignal:Fire()
 
 	Promise.delay(self.reloadSeconds.Value, function()
 		self.ammo:SetValue(self.maxAmmo.Value)
@@ -137,6 +148,10 @@ function GunServiceClient._startShooting(self)
 			maid:DoCleaning()
 		end
 	end))
+end
+
+function GunServiceClient._stopShooting(self)
+	self.state:SetValue("ready")
 end
 
 return GunServiceClient

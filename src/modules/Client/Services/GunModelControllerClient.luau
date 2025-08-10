@@ -15,12 +15,20 @@ function GunModelControllerClient.Init(self, serviceBag)
 	self._maid = Maid.new()
 	self._gunServiceClient = serviceBag:GetService(require("GunServiceClient"))
 
-	self._swayAmount = 0.05
+	self._swayAmount = 5
 	self._swaySpeed = 5
 	self._bobAmount = 0.05
 	self._bobSpeed = 10
 	self._bobTime = 0
 	self._lastMouseDelta = Vector2.zero
+	self._movementIntensity = 0
+
+	self._groundSmoothing = 1
+	self._lastGroundState = 1
+	self._smoothVerticalVelocity = 0
+	self._fallVelocity = 0
+	self._airTime = 0
+	self._landingImpact = 0
 
 	-- Public
 end
@@ -32,28 +40,132 @@ function GunModelControllerClient.Start(self)
 			if not humanoid then
 				return
 			end
-			-- Get mouse delta for sway
+
+			-- Track jump/fall state with smoothing
+			local isOnGround = humanoid.FloorMaterial ~= Enum.Material.Air
+			local verticalVelocity = 0
+
+			if character.PrimaryPart then
+				verticalVelocity = character.PrimaryPart.AssemblyLinearVelocity.Y
+			end
+
+			-- Smooth the ground state to reduce jitter
+			self._groundSmoothing = self._groundSmoothing or 1
+			if isOnGround then
+				self._groundSmoothing = math.min(1, self._groundSmoothing + deltaTime * 8)
+			else
+				self._groundSmoothing = math.max(0, self._groundSmoothing - deltaTime * 4)
+			end
+
+			local smoothedGroundState = self._groundSmoothing
+
+			-- Smooth vertical velocity
+			self._smoothVerticalVelocity = self._smoothVerticalVelocity or 0
+			self._smoothVerticalVelocity = math.lerp(self._smoothVerticalVelocity, verticalVelocity, deltaTime * 6)
+
+			-- Detect landing with threshold
+			if smoothedGroundState > 0.8 and self._lastGroundState < 0.2 and self._fallVelocity < -8 then
+				-- Landing impact
+				self._landingImpact = math.min(math.abs(self._fallVelocity) / 40, 0.8)
+			end
+
+			-- Update state tracking
+			self._lastGroundState = smoothedGroundState
+			if smoothedGroundState < 0.3 then
+				self._fallVelocity = self._smoothVerticalVelocity
+			end
+
+			-- Get mouse delta for sway with smoothing
 			local mouseDelta = UserInputService:GetMouseDelta()
 			self._lastMouseDelta = self._lastMouseDelta:Lerp(mouseDelta, deltaTime * self._swaySpeed)
 
-			-- Sway offset based on mouse movement
-			local swayX = -self._lastMouseDelta.X * self._swayAmount
-			local swayY = -self._lastMouseDelta.Y * self._swayAmount
+			-- Enhanced sway with rotation
+			local swayX = -self._lastMouseDelta.X * self._swayAmount * 0.01
+			local swayY = -self._lastMouseDelta.Y * self._swayAmount * 0.01
+			local swayRotX = self._lastMouseDelta.Y * self._swayAmount * 0.002
+			local swayRotY = -self._lastMouseDelta.X * self._swayAmount * 0.002
 
-			-- Bobbing when moving
-			local moveDirection = humanoid.MoveDirection.Magnitude
-			if moveDirection > 0 then
-				self._bobTime += deltaTime * self._bobSpeed
+			-- Improved bobbing system
+			local moveDirection = humanoid.MoveDirection
+			local moveMagnitude = moveDirection.Magnitude
+			local walkSpeed = humanoid.WalkSpeed or 16
+			local currentSpeed = moveMagnitude * walkSpeed
+
+			-- Always update bob time to prevent snapping
+			if moveMagnitude > 0.1 then
+				-- Increase bob time based on actual movement speed
+				local speedMultiplier = math.min(currentSpeed / 16, 2) -- Cap at 2x normal speed
+				self._bobTime += deltaTime * self._bobSpeed * speedMultiplier
 			else
-				self._bobTime = 0
+				-- Continue bobbing but at reduced rate to fade smoothly
+				self._bobTime += deltaTime * self._bobSpeed * 0.1
 			end
 
-			local bobOffset = Vector3.new(0, math.sin(self._bobTime * 2) * self._bobAmount, 0)
+			-- Smooth movement intensity that fades gradually
+			self._movementIntensity = self._movementIntensity or 0
+			self._movementIntensity = math.lerp(self._movementIntensity, moveMagnitude, deltaTime * 8)
 
-			local swayOffset = CFrame.new(swayX, swayY, 0)
-			local finalOffset = swayOffset * CFrame.new(bobOffset) * CFrame.new(0.5, -1, 0)
+			-- Jump/Fall effects with smoothing
+			local jumpSway = Vector3.new(0, 0, 0)
+			local jumpRotation = CFrame.new()
 
-			self._gunServiceClient.gunModel:PivotTo(workspace.CurrentCamera.CFrame * finalOffset)
+			-- Only apply air effects when clearly not on ground
+			if smoothedGroundState < 0.7 then
+				-- In-air sway (floating/falling effect)
+				local airTime = self._airTime or 0
+				self._airTime = airTime + deltaTime
+
+				-- Gentle floating motion while in air (reduced intensity)
+				local airIntensity = 1 - smoothedGroundState
+				jumpSway = Vector3.new(
+					math.sin(airTime * 1.2) * 0.015 * airIntensity,
+					math.sin(airTime * 0.6) * 0.02 * airIntensity,
+					0
+				)
+
+				-- Slight rotation based on smoothed vertical velocity
+				local pitchFromVelocity = math.clamp(self._smoothVerticalVelocity * 0.003, -0.08, 0.08)
+				jumpRotation = CFrame.Angles(pitchFromVelocity * airIntensity, 0, 0)
+			else
+				-- Gradually reduce air time when on ground
+				self._airTime = (self._airTime or 0) * (1 - deltaTime * 3)
+			end
+
+			-- Landing impact effect with smoother decay
+			self._landingImpact = self._landingImpact or 0
+			if self._landingImpact > 0.01 then
+				-- Sharp downward then upward motion (reduced intensity)
+				local impactPhase = (1 - self._landingImpact) * math.pi
+				local impactOffset = Vector3.new(0, -math.sin(impactPhase) * 0.06 * self._landingImpact, 0)
+				jumpSway = jumpSway + impactOffset
+
+				-- Smoother decay of impact
+				self._landingImpact = math.max(0, self._landingImpact - deltaTime * 3.5)
+			end
+
+			-- More realistic bobbing with multiple components using smooth intensity
+			local bobVertical = math.sin(self._bobTime * 2) * self._bobAmount * self._movementIntensity
+			local bobHorizontal = math.sin(self._bobTime) * self._bobAmount * 0.5 * self._movementIntensity
+			local bobRotational = math.sin(self._bobTime * 1.5) * 0.02 * self._movementIntensity
+
+			-- Create offset vectors
+			local bobOffset = Vector3.new(bobHorizontal, bobVertical, 0)
+			local swayOffset = Vector3.new(swayX, swayY, 0)
+
+			-- Combine all movement effects
+			local totalOffset = bobOffset + swayOffset + jumpSway
+
+			-- Combine rotational components
+			local swayRotation = CFrame.Angles(swayRotX, swayRotY, bobRotational)
+			local totalRotation = swayRotation * jumpRotation
+
+			-- Base position offset (adjust these values to your preference)
+			local baseOffset = Vector3.new(0.65, -1, 1)
+
+			-- Combine all transformations
+			local finalCFrame = workspace.CurrentCamera.CFrame * CFrame.new(baseOffset + totalOffset) * totalRotation
+
+			self._gunServiceClient.gunModel:PivotTo(finalCFrame)
 		end)
 	end))
 end

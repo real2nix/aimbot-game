@@ -9,6 +9,7 @@ local ScreenGuiProvider = require("ScreenGuiProvider")
 local Maid = require("Maid")
 local CharacterPromiseUtils = require("CharacterPromiseUtils")
 local RxAttributeUtils = require("RxAttributeUtils")
+
 function PlayerClassClient.new(serviceBag, player)
 	local self = setmetatable({}, PlayerClassClient)
 
@@ -18,11 +19,11 @@ function PlayerClassClient.new(serviceBag, player)
 	self._forcefieldObject = nil
 
 	CharacterPromiseUtils.promiseCharacter(player):Then(function(character: Model)
-		self._animatedHighlightModel = self._highlightServiceClient:Highlight(character, 1)
-		self._animatedHighlightModel:SetHighlightDepthMode(Enum.HighlightDepthMode.AlwaysOnTop)
-		self._animatedHighlightModel:SetFillColor(Color3.fromRGB(255, 0, 0))
-		self._animatedHighlightModel:SetFillTransparency(0.8)
-		self._animatedHighlightModel:SetOutlineTransparency(1)
+		local animatedHighlightModel = self._maid:Add(self._highlightServiceClient:Highlight(character, 1))
+		animatedHighlightModel:SetHighlightDepthMode(Enum.HighlightDepthMode.AlwaysOnTop)
+		animatedHighlightModel:SetFillColor(Color3.fromRGB(255, 0, 0))
+		animatedHighlightModel:SetFillTransparency(0.8)
+		animatedHighlightModel:SetOutlineTransparency(1)
 	end)
 
 	self._maid:Add(player:GetAttributeChangedSignal("health"):Connect(function()

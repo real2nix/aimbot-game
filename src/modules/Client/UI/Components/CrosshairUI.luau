@@ -23,17 +23,21 @@ end
 
 local function crosshair(props): ()
 	local isDead, updateIsDead = React.useState(props._deathServiceClient.isClientDead.Value)
-	props._deathServiceClient.isClientDead.Changed:Connect(function(newValue)
-		updateIsDead(newValue)
-	end)
-	if isDead then
-		return nil
-	end
+	React.useEffect(function()
+		local connection = props._deathServiceClient.isClientDead.Changed:Connect(function(newValue)
+			updateIsDead(newValue)
+		end)
+		return function()
+			connection:Disconnect()
+		end
+	end, {})
+
 	return React.createElement("Frame", {
 		Size = UDim2.fromOffset(20, 20),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
 		BackgroundTransparency = 1,
+		Visible = not isDead,
 	}, {
 		TopFrame = React.createElement("Frame", {
 			Size = UDim2.fromOffset(WIDTH, HEIGHT),
@@ -73,7 +77,9 @@ function CrosshairUI.Start(self)
 	local handle = self._screenGuiProvider:Get("CROSSHAIR")
 	handle.IgnoreGuiInset = true
 	self._root = ReactRoblox.createRoot(handle)
-	self._root:render(React.createElement(crosshair, { _deathServiceClient = self._deathServiceClient }))
+	self._root:render(React.createElement(crosshair, {
+		_deathServiceClient = self._deathServiceClient,
+	}))
 end
 
 function CrosshairUI.Destroy(self)

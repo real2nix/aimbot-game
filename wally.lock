@@ -3,9 +3,19 @@
 registry = "test"
 
 [[package]]
+name = "chriscerie/react-spring"
+version = "2.0.0"
+dependencies = [["Promise", "evaera/promise@4.0.0"], ["React", "jsdotlua/react@17.2.1"], ["ReactRoblox", "jsdotlua/react-roblox@17.2.1"], ["TestEZ", "roblox/testez@0.4.1"]]
+
+[[package]]
 name = "d3rpv/aimbot"
 version = "0.1.0"
-dependencies = [["react", "jsdotlua/react@17.2.1"], ["react-roblox", "jsdotlua/react-roblox@17.2.1"]]
+dependencies = [["React", "jsdotlua/react@17.2.1"], ["ReactRoblox", "jsdotlua/react-roblox@17.2.1"], ["ReactSpring", "chriscerie/react-spring@2.0.0"]]
+
+[[package]]
+name = "evaera/promise"
+version = "4.0.0"
+dependencies = []
 
 [[package]]
 name = "jsdotlua/boolean"
@@ -91,3 +101,8 @@ dependencies = []
 name = "jsdotlua/timers"
 version = "1.2.7"
 dependencies = [["collections", "jsdotlua/collections@1.2.7"]]
+
+[[package]]
+name = "roblox/testez"
+version = "0.4.1"
+dependencies = []

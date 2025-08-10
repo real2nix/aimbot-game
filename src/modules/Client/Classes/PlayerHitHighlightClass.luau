@@ -14,10 +14,10 @@ function PlayerHitHighlightClass.new(serviceBag, playerHit)
 	self._maid = Maid.new()
 	self._highlightServiceClient = serviceBag:GetService(require("HighlightServiceClient"))
 
-	local transparencySpring = self._maid:Add(SpringObject.new(1, 10, 2))
+	local transparencySpring = self._maid:Add(SpringObject.new(5, 10, 3))
 	transparencySpring:SetPosition(0)
 	self._maid:Add(transparencySpring:Observe():Subscribe(function(value)
-		if value >= 1 then
+		if value >= 0.9 then
 			self:Destroy()
 		end
 	end))
