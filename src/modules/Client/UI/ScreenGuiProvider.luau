@@ -9,7 +9,7 @@ return GenericScreenGuiProvider.new({
 	AIMBOT_LINES = 1,
 	HITMARKER = 3,
 	AMMO = 1,
-	DAMAGE_INDICATOR = 2,
+	DAMAGE_DIRECTION = 2,
 	ELIMINATIONS = 1,
 	RELOAD = 1,
 })

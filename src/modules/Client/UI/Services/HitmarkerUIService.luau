@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local React = require(ReplicatedStorage["react-lua"]["react"])
-local ReactRoblox = require(ReplicatedStorage["react-lua"]["react-roblox"])
-local RunService = game:GetService("RunService")
+local React = require(ReplicatedStorage.Packages.React)
+local ReactRoblox = require(ReplicatedStorage.Packages.ReactRoblox)
 
 local require = require(script.Parent.loader).load(script)
 
@@ -12,56 +11,38 @@ local Maid = require("Maid")
 local HitmarkerUI = require("HitmarkerUI")
 
 local function HitmarkersContainer(props)
-	local gunServiceClient = props.gunServiceClient
 	local hitmarkers, setHitmarkers = React.useState({})
 	local nextId, setNextId = React.useState(1)
 
-	-- Listen for hit signals and add new hitmarkers
 	React.useEffect(function()
-		local connection = gunServiceClient.playerHitSignal:Connect(function(hitType)
-			local id = nextId
-			setNextId(id + 1)
-
-			-- Add new hitmarker to collection
-			setHitmarkers(function(currentHitmarkers)
-				local newHitmarkers = {}
-				for existingId, hitmarker in pairs(currentHitmarkers) do
-					newHitmarkers[existingId] = hitmarker
-				end
-
-				newHitmarkers[id] = {
-					id = id,
-					hitType = hitType,
-				}
-
-				return newHitmarkers
+		local connection = props.gunServiceClient.playerHitSignal:Connect(function()
+			setNextId(function(prevId)
+				local id = prevId
+				setHitmarkers(function(currentHitmarkers)
+					local newHitmarkers = table.clone(currentHitmarkers)
+					newHitmarkers[id] = true
+					return newHitmarkers
+				end)
+				return id + 1
 			end)
 		end)
 		return function()
 			connection:Disconnect()
 		end
-	end, { nextId })
+	end, {})
 
-	-- Function to remove hitmarker when it self-destructs
 	local removeHitmarker = React.useCallback(function(id)
 		setHitmarkers(function(currentHitmarkers)
-			local newHitmarkers = {}
-			for existingId, hitmarker in pairs(currentHitmarkers) do
-				if existingId ~= id then
-					newHitmarkers[existingId] = hitmarker
-				end
-			end
-			return newHitmarkers
+			currentHitmarkers[id] = nil
+			return currentHitmarkers
 		end)
 	end, {})
 
 	local hitmarkerElements = {}
-	for id, hitmarkerData in pairs(hitmarkers) do
-		hitmarkerElements["Hitmarker_" .. id] = React.createElement(HitmarkerUI, {
+	for id in pairs(hitmarkers) do
+		hitmarkerElements[id] = React.createElement(HitmarkerUI, {
 			id = id,
-			hitType = hitmarkerData.hitType,
 			onDestroy = removeHitmarker,
-			duration = 0.4, -- Slightly longer for better visibility
 		})
 	end
 

@@ -27,10 +27,11 @@ end
 
 function GunModelControllerClient.Start(self)
 	self._maid:Add(CharacterPromiseUtils.promiseCharacter(Players.LocalPlayer):Then(function(character: Model)
-		local humanoid: Humanoid = character:FindFirstChild("Humanoid") :: Humanoid
-
-		--TODO check if playher is in 3rd person
 		RunService.PreRender:Connect(function(deltaTime: number)
+			local humanoid = character:FindFirstChild("Humanoid")
+			if not humanoid then
+				return
+			end
 			-- Get mouse delta for sway
 			local mouseDelta = UserInputService:GetMouseDelta()
 			self._lastMouseDelta = self._lastMouseDelta:Lerp(mouseDelta, deltaTime * self._swaySpeed)

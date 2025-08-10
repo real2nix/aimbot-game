@@ -1,7 +1,6 @@
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local React = require(ReplicatedStorage["react-lua"]["react"])
-local ReactRoblox = require(ReplicatedStorage["react-lua"]["react-roblox"])
+local React = require(ReplicatedStorage.Packages.React)
+local ReactRoblox = require(ReplicatedStorage.Packages.ReactRoblox)
 
 local require = require(script.Parent.loader).load(script)
 
@@ -23,34 +22,31 @@ local function Bullet()
 end
 
 local function RemainingBullets(props)
-	local gunServiceClient = props.gunServiceClient
-	local ammo, updateAmmo = React.useState(gunServiceClient.ammo.Value)
+	local ammo, updateAmmo = React.useState(props.gunServiceClient.ammo.Value)
 
-	-- must be a better way to do this
 	React.useEffect(function()
-		local connection = gunServiceClient.ammo.Changed:Connect(function()
-			updateAmmo(gunServiceClient.ammo.Value)
+		local connection = props.gunServiceClient.ammo.Changed:Connect(function()
+			updateAmmo(props.gunServiceClient.ammo.Value)
 		end)
 
 		return function()
 			connection:Disconnect()
 		end
-	end, { gunServiceClient })
+	end, {})
 
 	local bullets = {
-		ListLayout = React.createElement("UIListLayout", {
+		React.createElement("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,
 			HorizontalAlignment = Enum.HorizontalAlignment.Center,
 			Padding = UDim.new(0.0035, 0),
 		}),
 	}
-
-	for i = 1, ammo do
+	for _ = 1, ammo do
 		table.insert(bullets, React.createElement(Bullet))
 	end
 
 	return React.createElement("Frame", {
-		Size = UDim2.new(1, 0, 0.05, 0),
+		Size = UDim2.fromScale(1, 0.05),
 		BackgroundTransparency = 1,
 	}, bullets)
 end

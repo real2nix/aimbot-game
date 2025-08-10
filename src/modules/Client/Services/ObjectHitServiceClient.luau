@@ -5,7 +5,7 @@ ObjectHitServiceClient.ServiceName = "ObjectHitServiceClient"
 
 local Maid = require("Maid")
 
-local ObjectHitParticlesClient = require("ObjectHitParticlesClient")
+local ObjectHitParticlesClassClient = require("ObjectHitParticlesClassClient")
 
 function ObjectHitServiceClient.Init(self, serviceBag)
 	self._maid = Maid.new()
@@ -15,7 +15,7 @@ end
 
 function ObjectHitServiceClient.Start(self)
 	self._maid:Add(self._gunServiceClient.objectHitSignal:Connect(function(data)
-		ObjectHitParticlesClient.new(self._serviceBag, data)
+		ObjectHitParticlesClassClient.new(self._serviceBag, data)
 	end))
 end
 

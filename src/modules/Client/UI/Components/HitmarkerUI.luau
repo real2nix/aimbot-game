@@ -1,13 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local React = require(ReplicatedStorage["react-lua"]["react"])
+local React = require(ReplicatedStorage.Packages.React)
+
+local DURATION = 0.3
 
 return function(props)
-	local id = props.id
-	local onDestroy = props.onDestroy
-	local duration = props.duration or 0.3
-
-	local timeRemaining, setTimeRemaining = React.useState(duration)
+	local timeRemaining, setTimeRemaining = React.useState(DURATION)
 	local scale, setScale = React.useState(0)
 	local alpha, setAlpha = React.useState(1)
 
@@ -17,10 +15,10 @@ return function(props)
 
 		local connection = RunService.Heartbeat:Connect(function()
 			local elapsed = os.clock() - startTime
-			local remaining = duration - elapsed
-			local progress = elapsed / duration
-
-			setTimeRemaining(remaining)
+			local progress = elapsed / DURATION
+			setTimeRemaining(function()
+				return DURATION - elapsed
+			end)
 
 			-- Scale animation: grow then shrink
 			if progress < 0.2 then
@@ -35,15 +33,15 @@ return function(props)
 			end
 
 			-- Self-destruct when time is up
-			if remaining <= 0 and onDestroy then
-				onDestroy(id)
+			if timeRemaining <= 0 then
+				props.onDestroy(props.id)
 			end
 		end)
 
 		return function()
 			connection:Disconnect()
 		end
-	end, { id, duration, onDestroy })
+	end, {})
 
 	-- Don't render if expired
 	if timeRemaining <= 0 then
@@ -58,7 +56,7 @@ return function(props)
 		BackgroundTransparency = 1,
 	}, {
 		Line1 = React.createElement("Frame", {
-			Size = UDim2.new(1, 0, 0, 2),
+			Size = UDim2.new(1, 0, 0, 1),
 			Position = UDim2.fromScale(0.5, 0.5),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -67,7 +65,7 @@ return function(props)
 			Rotation = 45,
 		}),
 		Line2 = React.createElement("Frame", {
-			Size = UDim2.new(1, 0, 0, 2),
+			Size = UDim2.new(1, 0, 0, 1),
 			Position = UDim2.fromScale(0.5, 0.5),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),

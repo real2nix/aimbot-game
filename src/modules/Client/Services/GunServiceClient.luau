@@ -7,7 +7,6 @@ local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
-local DamageMarkerClient = require("DamageMarkerClient")
 local Maid = require("Maid")
 local Signal = require("Signal")
 local ValueObject = require("ValueObject")
@@ -120,7 +119,6 @@ function GunServiceClient._shoot(self)
 		playerShooter = Players.LocalPlayer,
 		bulletUnitVector = Camera.CFrame.LookVector,
 	}
-	DamageMarkerClient.new(self._serviceBag, data)
 	self.playerHitSignal:Fire(data)
 	self._remoteEventPromise:Then(function(remoteEvent: RemoteEvent)
 		remoteEvent:FireServer("shoot", data)

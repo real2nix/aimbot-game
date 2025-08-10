@@ -25,11 +25,11 @@ function ObjectHitParticlesClient.new(serviceBag, data)
 	return self
 end
 
-function ObjectHitParticlesClient.Destroy(self: ClientTypes.ObjectHitParticlesClient)
+function ObjectHitParticlesClient.Destroy(self)
 	self._maid:DoCleaning()
 end
 
-function ObjectHitParticlesClient._addBulletHole(self: ClientTypes.ObjectHitParticlesClient, data)
+function ObjectHitParticlesClient._addBulletHole(self, data)
 	local cframe: CFrame = CFrame.new(data.position, data.position + data.normal)
 	self._maid:Add(Blend.New("Part")({
 		Name = "BulletHole",
@@ -42,7 +42,7 @@ function ObjectHitParticlesClient._addBulletHole(self: ClientTypes.ObjectHitPart
 	}):Subscribe())
 end
 
-function ObjectHitParticlesClient._addParticle(self: ClientTypes.ObjectHitParticlesClient, data)
+function ObjectHitParticlesClient._addParticle(self, data)
 	local cframe: CFrame = CFrame.new(data.position, data.position + data.bulletUnitVector)
 	self._maid:Add(Blend.New("Part")({
 		Name = "Particles",

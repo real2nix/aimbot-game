@@ -18,8 +18,8 @@
       }
     },
     "ReplicatedStorage":{
-        "react-lua" : {
-            "$path" : "react-lua"
+        "Packages" : {
+            "$path" : "Packages"
         }
     },
     "StarterPlayer": {
