@@ -12,4 +12,5 @@ return GenericScreenGuiProvider.new({
 	DAMAGE_DIRECTION = 2,
 	ELIMINATIONS = 1,
 	RELOAD = 1,
+	PLAYERS_TRACKER = 2,
 })
