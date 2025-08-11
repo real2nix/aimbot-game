@@ -11,10 +11,12 @@ local AttributeUtils = require("AttributeUtils")
 local function getBoundingBoxSize(props)
 	local rootPart = CharacterUtils.getPlayerRootPart(props.player)
 	if not rootPart then
+		print("no rootpart")
 		return UDim2.new()
 	end
 	local character = props.player.Character
 	if not character then
+		print("no chjaracter")
 		return UDim2.new()
 	end
 	local topOffset = rootPart.CFrame.UpVector * props.characterSize.Y / 2

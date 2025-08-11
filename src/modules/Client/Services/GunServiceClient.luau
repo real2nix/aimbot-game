@@ -5,6 +5,7 @@ GunServiceClient.ServiceName = "GunServiceClient"
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
 local Maid = require("Maid")
@@ -36,12 +37,13 @@ function GunServiceClient.Init(self, serviceBag)
 	self.reloadSeconds = self._maid:Add(ValueObject.new(1, "number"))
 	self.shootCooldownSeconds = self._maid:Add(ValueObject.new(0.115, "number"))
 	self.damagePerBullet = self._maid:Add(ValueObject.new(20, "number"))
-	self.gunModel = Workspace.Model
+	self.gunModel = ReplicatedStorage.Assets.Guns.AK47:Clone()
 
 	self.reloadSignal = self._maid:Add(Signal.new())
 	self.startShootingSignal = self._maid:Add(Signal.new())
 	self.stopShootingSignal = self._maid:Add(Signal.new())
 	self.shotSignal = self._maid:Add(Signal.new())
+	self.missSignal = self._maid:Add(Signal.new())
 	self.playerHitSignal = self._maid:Add(Signal.new())
 	self.objectHitSignal = self._maid:Add(Signal.new())
 end
@@ -108,6 +110,7 @@ function GunServiceClient._shoot(self)
 		{ Players.LocalPlayer.Character, workspace.Ignore }
 	)
 	if not raycastResult then
+		self.missSignal:Fire()
 		return
 	end
 	local playerHit: Player? = CharacterUtils.getPlayerFromCharacter(raycastResult.Instance)

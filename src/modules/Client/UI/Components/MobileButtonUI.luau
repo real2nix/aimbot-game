@@ -26,6 +26,7 @@ return function(props)
 			setIsActive(false)
 		end,
 		[React.Event.MouseButton1Click] = props.mouseButton1Click,
+		[React.Event.MouseLeave] = props.mouseExit,
 	}, {
 		React.createElement("ImageLabel", {
 			Image = `rbxassetid://{props.imageId}`,

@@ -33,15 +33,18 @@ local function component(props)
 			mouseButton1Up = function()
 				props._gunServiceClient.stopShootingSignal:Fire()
 			end,
+			mouseExit = function()
+				props._gunServiceClient.stopShootingSignal:Fire()
+			end,
 			imageId = 123105545518463,
-			position = UDim2.new(1, -60, 1, -170),
+			position = UDim2.new(1, -80, 1, -150),
 		}),
 		Reload = React.createElement(MobileButtonUI, {
 			mouseButton1Click = function()
 				props._gunServiceClient.reloadSignal:Fire()
 			end,
 			imageId = 89929910879409,
-			position = UDim2.new(1, -170, 1, -60),
+			position = UDim2.new(1, -170, 1, -70),
 		}),
 	})
 end

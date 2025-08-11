@@ -56,10 +56,11 @@ function ObjectHitParticlesClient._addParticle(self, data)
 			EmissionDirection = Enum.NormalId.Back,
 			Rate = 0,
 			Speed = NumberRange.new(0.5),
-			Lifetime = NumberRange.new(0.8),
+			Lifetime = NumberRange.new(2),
+			Texture = "rbxassetid://12533301072",
 			Size = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 0.2),
-				NumberSequenceKeypoint.new(1, 0.05),
+				NumberSequenceKeypoint.new(0, 0.125),
+				NumberSequenceKeypoint.new(1, 0.02),
 			}),
 			Transparency = NumberSequence.new({
 				NumberSequenceKeypoint.new(0, 0),
