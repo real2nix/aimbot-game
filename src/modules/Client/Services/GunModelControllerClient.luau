@@ -15,10 +15,10 @@ function GunModelControllerClient.Init(self, serviceBag)
 	self._maid = Maid.new()
 	self._gunServiceClient = serviceBag:GetService(require("GunServiceClient"))
 
-	self._swayAmount = 5
+	self._swayAmount = 2
 	self._swaySpeed = 5
 	self._bobAmount = 0.05
-	self._bobSpeed = 10
+	self._bobSpeed = 7
 	self._bobTime = 0
 	self._lastMouseDelta = Vector2.zero
 	self._movementIntensity = 0
@@ -30,16 +30,33 @@ function GunModelControllerClient.Init(self, serviceBag)
 	self._airTime = 0
 	self._landingImpact = 0
 
+	-- Recoil system
+	self._recoilOffset = Vector3.new(0, 0, 0)
+	self._recoilRotation = CFrame.new()
+	self._recoilIntensity = 0.15 -- How much the gun kicks back (Z-axis)
+	self._recoilUpward = 0.08 -- How much the gun kicks up (Y-axis)
+	self._recoilRotationAmount = 0.12 -- How much the gun rotates upward (radians)
+	self._recoilRecoverySpeed = 8 -- How fast recoil returns to normal
+
 	-- Public
 end
 
 function GunModelControllerClient.Start(self)
 	self._maid:Add(CharacterPromiseUtils.promiseCharacter(Players.LocalPlayer):Then(function(character: Model)
+		self._gunServiceClient.shotSignal:Connect(function()
+			-- Apply instant recoil when shot
+			self._recoilOffset = Vector3.new(0, self._recoilUpward, self._recoilIntensity)
+			self._recoilRotation = CFrame.Angles(self._recoilRotationAmount, 0, 0)
+		end)
 		RunService.PreRender:Connect(function(deltaTime: number)
 			local humanoid = character:FindFirstChild("Humanoid")
 			if not humanoid then
 				return
 			end
+
+			-- Smoothly recover recoil back to normal
+			self._recoilOffset = self._recoilOffset:Lerp(Vector3.new(0, 0, 0), deltaTime * self._recoilRecoverySpeed)
+			self._recoilRotation = self._recoilRotation:Lerp(CFrame.new(), deltaTime * self._recoilRecoverySpeed)
 
 			-- Track jump/fall state with smoothing
 			local isOnGround = humanoid.FloorMaterial ~= Enum.Material.Air
@@ -152,15 +169,15 @@ function GunModelControllerClient.Start(self)
 			local bobOffset = Vector3.new(bobHorizontal, bobVertical, 0)
 			local swayOffset = Vector3.new(swayX, swayY, 0)
 
-			-- Combine all movement effects
-			local totalOffset = bobOffset + swayOffset + jumpSway
+			-- Combine all movement effects including recoil
+			local totalOffset = bobOffset + swayOffset + jumpSway + self._recoilOffset
 
-			-- Combine rotational components
+			-- Combine rotational components including recoil
 			local swayRotation = CFrame.Angles(swayRotX, swayRotY, bobRotational)
-			local totalRotation = swayRotation * jumpRotation
+			local totalRotation = swayRotation * jumpRotation * self._recoilRotation
 
 			-- Base position offset (adjust these values to your preference)
-			local baseOffset = Vector3.new(0.65, -1, 1)
+			local baseOffset = Vector3.new(0.65, -1, -2)
 
 			-- Combine all transformations
 			local finalCFrame = workspace.CurrentCamera.CFrame * CFrame.new(baseOffset + totalOffset) * totalRotation

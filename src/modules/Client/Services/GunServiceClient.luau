@@ -41,6 +41,7 @@ function GunServiceClient.Init(self, serviceBag)
 	self.reloadSignal = self._maid:Add(Signal.new())
 	self.startShootingSignal = self._maid:Add(Signal.new())
 	self.stopShootingSignal = self._maid:Add(Signal.new())
+	self.shotSignal = self._maid:Add(Signal.new())
 	self.playerHitSignal = self._maid:Add(Signal.new())
 	self.objectHitSignal = self._maid:Add(Signal.new())
 end
@@ -99,6 +100,7 @@ function GunServiceClient._shoot(self)
 	if not Players.LocalPlayer.Character or self.ammo.Value <= 0 then
 		return
 	end
+	self.shotSignal:Fire()
 	self.ammo:SetValue(self.ammo.Value - 1)
 	local raycastResult: RaycastResult? = RaycastUtils.raycast(
 		Camera.CFrame.Position,
