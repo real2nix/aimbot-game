@@ -38,17 +38,28 @@ function GunModelControllerClient.Init(self, serviceBag)
 	self._recoilRotationAmount = 0.12 -- How much the gun rotates upward (radians)
 	self._recoilRecoverySpeed = 8 -- How fast recoil returns to normal
 
+	-- Reload animation state
+	self._reloadOffset = Vector3.new(0, 0, 0)
+	self._isReloading = false
+	self._reloadTime = self._gunServiceClient.reloadSeconds.Value -- How long the animation lasts (seconds)
+
 	-- Public
 end
 
 function GunModelControllerClient.Start(self)
 	self._maid:Add(CharacterPromiseUtils.promiseCharacter(Players.LocalPlayer):Then(function(character: Model)
-		self._gunServiceClient.shotSignal:Connect(function()
+		self._maid:Add(self._gunServiceClient.shotSignal:Connect(function()
 			-- Apply instant recoil when shot
 			self._recoilOffset = Vector3.new(0, self._recoilUpward, self._recoilIntensity)
 			self._recoilRotation = CFrame.Angles(self._recoilRotationAmount, 0, 0)
-		end)
-		RunService.PreRender:Connect(function(deltaTime: number)
+		end))
+		self._maid:Add(self._gunServiceClient.reloadSignal:Connect(function()
+			-- Trigger reload animation
+			self._isReloading = true
+			self._reloadTimer = 0
+		end))
+
+		self._maid:Add(RunService.PreRender:Connect(function(deltaTime: number)
 			local humanoid = character:FindFirstChild("Humanoid")
 			if not humanoid then
 				return
@@ -57,6 +68,28 @@ function GunModelControllerClient.Start(self)
 			-- Smoothly recover recoil back to normal
 			self._recoilOffset = self._recoilOffset:Lerp(Vector3.new(0, 0, 0), deltaTime * self._recoilRecoverySpeed)
 			self._recoilRotation = self._recoilRotation:Lerp(CFrame.new(), deltaTime * self._recoilRecoverySpeed)
+
+			-- Handle reload animation
+			if self._isReloading then
+				self._reloadTimer = self._reloadTimer + deltaTime
+				local halfTime = self._reloadTime / 2
+
+				if self._reloadTimer <= halfTime then
+					-- First half: move gun down
+					local t = self._reloadTimer / halfTime
+					self._reloadOffset = Vector3.new(0, -math.sin(t * math.pi / 2) * 3, 0) -- move down
+				elseif self._reloadTimer <= self._reloadTime then
+					-- Second half: move gun back up
+					local t = (self._reloadTimer - halfTime) / halfTime
+					self._reloadOffset = Vector3.new(0, -math.sin((1 - t) * math.pi / 2) * 3, 0) -- move up
+				else
+					-- End animation
+					self._reloadOffset = Vector3.new(0, 0, 0)
+					self._isReloading = false
+				end
+			else
+				self._reloadOffset = Vector3.new(0, 0, 0)
+			end
 
 			-- Track jump/fall state with smoothing
 			local isOnGround = humanoid.FloorMaterial ~= Enum.Material.Air
@@ -170,7 +203,7 @@ function GunModelControllerClient.Start(self)
 			local swayOffset = Vector3.new(swayX, swayY, 0)
 
 			-- Combine all movement effects including recoil
-			local totalOffset = bobOffset + swayOffset + jumpSway + self._recoilOffset
+			local totalOffset = bobOffset + swayOffset + jumpSway + self._recoilOffset + self._reloadOffset
 
 			-- Combine rotational components including recoil
 			local swayRotation = CFrame.Angles(swayRotX, swayRotY, bobRotational)
@@ -183,7 +216,7 @@ function GunModelControllerClient.Start(self)
 			local finalCFrame = workspace.CurrentCamera.CFrame * CFrame.new(baseOffset + totalOffset) * totalRotation
 
 			self._gunServiceClient.gunModel:PivotTo(finalCFrame)
-		end)
+		end))
 	end))
 end
 
