@@ -15,7 +15,6 @@ function GunModelControllerClient.Init(self, serviceBag)
 	-- Private
 	self._maid = Maid.new()
 	self._gunServiceClient = serviceBag:GetService(require("GunServiceClient"))
-	self._isActive = false
 
 	self._swayAmount = 2
 	self._swaySpeed = 5
@@ -51,11 +50,12 @@ end
 function GunModelControllerClient.Start(self)
 	self._gunServiceClient.gunModel.Parent = workspace.Ignore
 
-	local function characterAdded()
-		if self._isActive then
-			return
-		end
-		self._isActive = true
+	local function onCharacterRemoving()
+		self._maid:DoCleaning()
+	end
+
+	local function onCharacterAdded()
+		self._maid:DoCleaning()
 		self._maid:Add(CharacterPromiseUtils.promiseCharacter(Players.LocalPlayer):Then(function(character: Model)
 			self._maid:Add(self._gunServiceClient.shotSignal:Connect(function()
 				-- Apply instant recoil when shot
@@ -69,10 +69,7 @@ function GunModelControllerClient.Start(self)
 			end))
 
 			local humanoid = CharacterUtils.getPlayerHumanoid(Players.LocalPlayer)
-			humanoid.Died:Connect(function()
-				self._maid:DoCleaning()
-				self._isActive = false
-			end)
+			self._maid:Add(humanoid.Died:Connect(onCharacterRemoving))
 
 			self._maid:Add(RunService.PreRender:Connect(function(deltaTime: number)
 				if not humanoid then
@@ -236,8 +233,10 @@ function GunModelControllerClient.Start(self)
 		end))
 	end
 
-	Players.LocalPlayer.CharacterAdded:Connect(characterAdded)
-	characterAdded()
+	if Players.LocalPlayer.Character then
+		onCharacterAdded()
+	end
+	Players.LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
 end
 
 function GunModelControllerClient.Destroy(self)

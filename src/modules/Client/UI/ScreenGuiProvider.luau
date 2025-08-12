@@ -14,4 +14,6 @@ return GenericScreenGuiProvider.new({
 	RELOAD = 1,
 	PLAYERS_TRACKER = 0,
 	MOBILE_BUTTONS = 1,
+	SCOREBOARD = 1,
+	COUNTDOWN = 1,
 })

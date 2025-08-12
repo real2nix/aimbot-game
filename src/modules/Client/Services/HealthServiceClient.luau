@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 local Maid = require("Maid")
 local ValueObject = require("ValueObject")
 local RxAttributeUtils = require("RxAttributeUtils")
+local AttributeUtils = require("AttributeUtils")
 
 function HealthServiceClient.Init(self, serviceBag)
 	self._maid = Maid.new()
@@ -19,11 +20,15 @@ function HealthServiceClient.Init(self, serviceBag)
 end
 
 function HealthServiceClient.Start(self)
-	self._maid:Add(RxAttributeUtils.observeAttribute(Players.LocalPlayer, "health"):Subscribe(function(newValue: number)
-		if newValue == 0 then
-			self._deathServiceClient.clientDiedSignal:Fire()
-		end
-		self.health:SetValue(newValue)
+	self._maid:Add(AttributeUtils.promiseAttribute(Players.LocalPlayer, "health"):Then(function()
+		self._maid:Add(
+			RxAttributeUtils.observeAttribute(Players.LocalPlayer, "health"):Subscribe(function(newValue: number)
+				self.health:SetValue(newValue)
+				if newValue == 0 then
+					self._deathServiceClient.clientDiedSignal:Fire()
+				end
+			end)
+		)
 	end))
 end
 

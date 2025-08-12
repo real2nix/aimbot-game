@@ -9,6 +9,7 @@ local PromiseGetRemoteEvent = require("PromiseGetRemoteEvent")
 local Signal = require("Signal")
 
 local REMOTE_EVENT_NAME: string = "GunController"
+local DAMAGE = 20
 
 function GunService.Init(self, serviceBag)
 	-- Private
@@ -18,6 +19,7 @@ function GunService.Init(self, serviceBag)
 
 	-- Public
 	self.playerHitSignal = self._maid:Add(Signal.new())
+	self.playerDiedSignal = self._maid:Add(Signal.new())
 end
 
 function GunService.Start(self)
@@ -36,10 +38,15 @@ function GunService.Start(self)
 				if (playerHitRoot.Position - data.position).Magnitude > 20 then
 					return
 				end
-				local damage = 20
-				local playerHitHealth = self._activePlayersService.activePlayers[data.playerHit].health
-				playerHitHealth.Value = math.max(playerHitHealth.Value - damage, 0)
+				local playerHitHealth = self._activePlayersService.activePlayers[data.playerHit].health.Value
+				local playerNewHitHealth = math.max(playerHitHealth - DAMAGE, 0)
+				self._activePlayersService.activePlayers[data.playerHit].health.Value = playerNewHitHealth
+
 				self.playerHitSignal:Fire(data)
+
+				if playerNewHitHealth == 0 then
+					self.playerDiedSignal:Fire(data)
+				end
 			end
 		end))
 	end)

@@ -36,6 +36,7 @@ local function component(props)
 			mouseExit = function()
 				props._gunServiceClient.stopShootingSignal:Fire()
 			end,
+			Size = UDim2.fromOffset(100, 100),
 			imageId = 123105545518463,
 			position = UDim2.new(1, -80, 1, -150),
 		}),

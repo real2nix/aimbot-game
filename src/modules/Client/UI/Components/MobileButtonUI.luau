@@ -7,7 +7,7 @@ return function(props)
 	local isActive, setIsActive = React.useState(false)
 
 	return React.createElement("TextButton", {
-		Size = UDim2.fromOffset(65, 65),
+		Size = if props.Size then props.Size else UDim2.fromOffset(65, 65),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Text = "",
 		Position = props.position,

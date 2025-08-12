@@ -3,7 +3,6 @@ local require = require(script.Parent.loader).load(script)
 local GunServiceClient = {}
 GunServiceClient.ServiceName = "GunServiceClient"
 
-local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
