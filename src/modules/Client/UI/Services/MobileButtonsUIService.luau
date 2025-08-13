@@ -36,16 +36,18 @@ local function component(props)
 			mouseExit = function()
 				props._gunServiceClient.stopShootingSignal:Fire()
 			end,
-			Size = UDim2.fromOffset(100, 100),
+			sizeOffset = 25,
 			imageId = 123105545518463,
-			position = UDim2.new(1, -80, 1, -150),
+			positionOffset = Vector2.new(-35, 0),
+			positioning = "above",
 		}),
 		Reload = React.createElement(MobileButtonUI, {
 			mouseButton1Click = function()
 				props._gunServiceClient.reloadSignal:Fire()
 			end,
 			imageId = 89929910879409,
-			position = UDim2.new(1, -170, 1, -70),
+			positionOffset = Vector2.new(0, -5),
+			positioning = "left",
 		}),
 	})
 end
@@ -61,7 +63,6 @@ end
 
 function MobileButtonsUIService.Start(self)
 	local handle = self._screenGuiProvider:Get("MOBILE_BUTTONS")
-	handle.IgnoreGuiInset = true
 	self._root = ReactRoblox.createRoot(handle)
 	self._root:render(React.createElement(component, {
 		_gunServiceClient = self._gunServiceClient,

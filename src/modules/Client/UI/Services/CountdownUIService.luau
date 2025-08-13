@@ -44,7 +44,7 @@ local function component(props)
 	return React.createElement("TextLabel", {
 		Text = string.format("%d:%02d", timeLeft // 60, timeLeft % 60),
 		Size = UDim2.fromScale(1, 0.05),
-		Position = UDim2.fromScale(0, 0.1),
+		Position = UDim2.new(0, 0, 0.08, 10),
 		BackgroundTransparency = 1,
 		Font = Enum.Font.GothamBold,
 		TextColor3 = Color3.fromRGB(255, 255, 255),

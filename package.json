@@ -11,6 +11,7 @@
   "dependencies": {
     "@jsdotlua/react": "^17.2.1",
     "@jsdotlua/react-roblox": "^17.2.1",
+    "@quenty/animations": "^8.19.1",
     "@quenty/attributeutils": "^14.18.0",
     "@quenty/binder": "^14.21.0",
     "@quenty/characterutils": "^12.19.0",
@@ -20,6 +21,7 @@
     "@quenty/genericscreenguiprovider": "^13.22.0",
     "@quenty/highlight": "^10.22.0",
     "@quenty/humanoiddescriptionutils": "^10.11.1",
+    "@quenty/jumpbuttonutils": "^2.3.0",
     "@quenty/loader": "^10.9.0",
     "@quenty/playerthumbnailutils": "^10.11.0",
     "@quenty/promise": "^10.11.0",
