@@ -52,11 +52,11 @@ function GunServiceClient.Start(self)
 		if self.state.Value == "ready" then
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				self.startShootingSignal:Fire()
-			elseif input.KeyCode == Enum.KeyCode.R then
+			elseif input.KeyCode == Enum.KeyCode.R and self.ammo.Value < self.maxAmmo.Value then
 				self.reloadSignal:Fire()
 			end
 		elseif self.state.Value == "shooting" then
-			if input.KeyCode == Enum.KeyCode.R then
+			if input.KeyCode == Enum.KeyCode.R and self.ammo.Value < self.maxAmmo.Value then
 				self.reloadSignal:Fire()
 			end
 		end
@@ -71,10 +71,14 @@ function GunServiceClient.Start(self)
 	end))
 
 	self._maid:Add(self.startShootingSignal:Connect(function()
-		self:_startShooting()
+		if self.state.Value == "ready" then
+			self:_startShooting()
+		end
 	end))
 	self._maid:Add(self.stopShootingSignal:Connect(function()
-		self:_stopShooting()
+		if self.state.Value == "shooting" then
+			self:_stopShooting()
+		end
 	end))
 	self._maid:Add(self.reloadSignal:Connect(function()
 		self:_reload()
@@ -86,9 +90,6 @@ function GunServiceClient.Destroy(self)
 end
 
 function GunServiceClient._reload(self)
-	if self.ammo.Value == self.maxAmmo.Value then
-		return
-	end
 	self.state:SetValue("reloading")
 
 	Promise.delay(self.reloadSeconds.Value, function()

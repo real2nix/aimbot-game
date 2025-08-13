@@ -28,13 +28,19 @@ local function component(props)
 	}, {
 		Shoot = React.createElement(MobileButtonUI, {
 			mouseButton1Down = function()
-				props._gunServiceClient.startShootingSignal:Fire()
+				if props._gunServiceClient.state.Value == "ready" then
+					props._gunServiceClient.startShootingSignal:Fire()
+				end
 			end,
 			mouseButton1Up = function()
-				props._gunServiceClient.stopShootingSignal:Fire()
+				if props._gunServiceClient.state.Value == "shooting" then
+					props._gunServiceClient.stopShootingSignal:Fire()
+				end
 			end,
 			mouseExit = function()
-				props._gunServiceClient.stopShootingSignal:Fire()
+				if props._gunServiceClient.state.Value == "shooting" then
+					props._gunServiceClient.stopShootingSignal:Fire()
+				end
 			end,
 			sizeOffset = 25,
 			imageId = 123105545518463,
@@ -43,7 +49,14 @@ local function component(props)
 		}),
 		Reload = React.createElement(MobileButtonUI, {
 			mouseButton1Click = function()
-				props._gunServiceClient.reloadSignal:Fire()
+				if
+					(
+						props._gunServiceClient.state.Value == "ready"
+						or props._gunServiceClient.state.Value == "shooting"
+					) and props._gunServiceClient.ammo.Value < props._gunServiceClient.maxAmmo.Value
+				then
+					props._gunServiceClient.reloadSignal:Fire()
+				end
 			end,
 			imageId = 89929910879409,
 			positionOffset = Vector2.new(0, -5),
