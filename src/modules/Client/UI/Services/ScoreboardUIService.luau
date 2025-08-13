@@ -34,15 +34,26 @@ local function scoreboardComponent(props)
 		end
 	end, {})
 
-	local children = {}
+	local children = {
+		React.createElement("UIListLayout", {
+			HorizontalAlignment = Enum.HorizontalAlignment.Center,
+			Padding = UDim.new(0, 5),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			FillDirection = Enum.FillDirection.Horizontal,
+		}),
+	}
 	for player in activePlayers do
-		children[player] = React.createElement(PlayerKillsUI, { player })
+		children[player] = React.createElement(PlayerKillsUI, {
+			player = player,
+			_playersScoreServiceClient = props._playersScoreServiceClient,
+		})
 	end
 
 	return React.createElement("Frame", {
 		Position = UDim2.new(0.5, 0, 0, 10),
-		Size = UDim2.fromScale(1, 0.05),
+		Size = UDim2.fromScale(1, 0.075),
 		AnchorPoint = Vector2.new(0.5, 0),
+		BackgroundTransparency = 1,
 	}, children)
 end
 

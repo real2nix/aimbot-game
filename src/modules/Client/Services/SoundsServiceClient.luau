@@ -12,6 +12,7 @@ function SoundsServiceClient.Init(self, serviceBag)
 	self._maid = Maid.new()
 	self._gunServiceClient = serviceBag:GetService(require("GunServiceClient"))
 	self._deathServiceClient = serviceBag:GetService(require("DeathServiceClient"))
+	self._playerHurtServiceClient = serviceBag:GetService(require("PlayerHurtServiceClient"))
 
 	-- Public
 end
@@ -22,6 +23,9 @@ function SoundsServiceClient.Start(self)
 	end))
 	self._maid:Add(self._deathServiceClient.clientDiedSignal:Connect(function()
 		SoundService:FindFirstChild("Died"):Play()
+	end))
+	self._maid:Add(self._playerHurtServiceClient.playerHurtSignal:Connect(function()
+		SoundService:FindFirstChild("Hurt"):Play()
 	end))
 end
 

@@ -8,27 +8,23 @@ local DamageDirectionUIService = {}
 DamageDirectionUIService.ServiceName = "DamageDirectionUIServiceClient"
 
 local Maid = require("Maid")
-local PromiseGetRemoteEvent = require("PromiseGetRemoteEvent")
 local DamageDirectionUI = require("DamageDirectionUI")
 
-local REMOTE_EVENT_NAME = "DAMAGE_INDICATOR"
-
-local function damageDirectionsContainer()
+local function damageDirectionsContainer(props)
 	local damageDirections, setDamageDirections = React.useState({})
 	local nextId, setNextId = React.useState(1)
+
 	React.useEffect(function()
-		PromiseGetRemoteEvent(REMOTE_EVENT_NAME):Then(function(remoteEvent: RemoteEvent)
-			remoteEvent.OnClientEvent:Connect(function(shooterPosition: Vector3)
-				setNextId(function(id)
-					setDamageDirections(function(prevDamageDirections)
-						local newDamageDirections = table.clone(prevDamageDirections)
-						newDamageDirections[id] = {
-							shooterPosition = shooterPosition,
-						}
-						return newDamageDirections
-					end)
-					return id + 1
+		props._playerHurtServiceClient.playerHurtSignal:Connect(function(data)
+			setNextId(function(id)
+				setDamageDirections(function(prevDamageDirections)
+					local newDamageDirections = table.clone(prevDamageDirections)
+					newDamageDirections[id] = {
+						shooterPosition = data.shooterPosition,
+					}
+					return newDamageDirections
 				end)
+				return id + 1
 			end)
 		end)
 	end, {})
@@ -57,13 +53,16 @@ function DamageDirectionUIService.Init(self, serviceBag)
 	self._maid = Maid.new()
 	self._serviceBag = serviceBag
 	self._screenGuiProvider = serviceBag:GetService(require("ScreenGuiProvider"))
+	self._playerHurtServiceClient = serviceBag:GetService(require("PlayerHurtServiceClient"))
 end
 
 function DamageDirectionUIService.Start(self)
 	local handle = self._screenGuiProvider:Get("DAMAGE_DIRECTION")
 	handle.IgnoreGuiInset = true
 	self._root = ReactRoblox.createRoot(handle)
-	self._root:render(React.createElement(damageDirectionsContainer, {}))
+	self._root:render(React.createElement(damageDirectionsContainer, {
+		_playerHurtServiceClient = self._playerHurtServiceClient,
+	}))
 end
 
 function DamageDirectionUIService.Destroy(self)
