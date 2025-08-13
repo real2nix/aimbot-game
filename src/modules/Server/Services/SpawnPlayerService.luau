@@ -41,6 +41,9 @@ function SpawnPlayerService._addForcefield(self, player: Player)
 	self._activePlayersService.activePlayers[player].health.Value = 150
 
 	Promise.delay(FORCEFIELD_SECONDS, function()
+		if not self._activePlayersService.activePlayers[player] then
+			return
+		end
 		self._activePlayersService.activePlayers[player].forcefield = false
 	end)
 end

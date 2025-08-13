@@ -19,7 +19,9 @@
     "@quenty/color3utils": "^11.19.0",
     "@quenty/genericscreenguiprovider": "^13.22.0",
     "@quenty/highlight": "^10.22.0",
+    "@quenty/humanoiddescriptionutils": "^10.11.1",
     "@quenty/loader": "^10.9.0",
+    "@quenty/promise": "^10.11.0",
     "@quenty/ragdoll": "^15.25.0",
     "@quenty/raycaster": "^3.5.0",
     "@quenty/servicebag": "^11.13.0"

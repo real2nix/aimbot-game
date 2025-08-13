@@ -8,7 +8,7 @@ FOVServiceClient.ServiceName = "FOVServiceClient"
 local Maid = require("Maid")
 local SpringObject = require("SpringObject")
 local CharacterPromiseUtils = require("CharacterPromiseUtils")
-local CharacterUtils = require("CharacterUtils")
+local promiseChild = require("promiseChild")
 
 function FOVServiceClient.Init(self, serviceBag)
 	-- Private
@@ -36,8 +36,9 @@ function FOVServiceClient.Start(self)
 			-- Set up FOV spring target updating
 			self:_setupFOVUpdating()
 
-			local humanoid = CharacterUtils.getPlayerHumanoid(Players.LocalPlayer)
-			self._maid:Add(humanoid.Died:Connect(onCharacterRemoving))
+			promiseChild(character, "Humanoid"):Then(function(humanoid)
+				self._maid:Add(humanoid.Died:Connect(onCharacterRemoving))
+			end)
 		end))
 	end
 
@@ -51,23 +52,25 @@ end
 
 function FOVServiceClient._setupMovementDetection(self)
 	-- Track movement using MoveVector (preferred method)
-	local humanoid = CharacterUtils.getPlayerHumanoid(Players.LocalPlayer)
-	local function checkMovement()
-		local wasMoving = self._isMoving
-		self._isMoving = humanoid.MoveDirection.Magnitude > 0
 
-		-- Update FOV when movement state changes
-		if wasMoving ~= self._isMoving then
-			if self._isMoving then
-				self._fovSpring:SetTarget(self._movingFov)
-			else
-				self._fovSpring:SetTarget(self._baseFov)
+	promiseChild(Players.LocalPlayer.Character, "Humanoid"):Then(function(humanoid)
+		local function checkMovement()
+			local wasMoving = self._isMoving
+			self._isMoving = humanoid.MoveDirection.Magnitude > 0
+
+			-- Update FOV when movement state changes
+			if wasMoving ~= self._isMoving then
+				if self._isMoving then
+					self._fovSpring:SetTarget(self._movingFov)
+				else
+					self._fovSpring:SetTarget(self._baseFov)
+				end
 			end
 		end
-	end
 
-	-- Check movement every frame
-	self._maid:GiveTask(RunService.Heartbeat:Connect(checkMovement))
+		-- Check movement every frame
+		self._maid:GiveTask(RunService.Heartbeat:Connect(checkMovement))
+	end)
 end
 
 function FOVServiceClient._setupFOVUpdating(self)
