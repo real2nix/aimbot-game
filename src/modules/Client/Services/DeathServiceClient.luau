@@ -27,11 +27,6 @@ function DeathServiceClient.Start(self)
 		Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
 		Players.LocalPlayer.CameraMaxZoomDistance = 25
 		Players.LocalPlayer.CameraMinZoomDistance = 25
-
-		Promise.delay(5, function()
-			Players.LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
-			self.isClientDead:SetValue(false)
-		end)
 	end))
 end
 

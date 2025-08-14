@@ -13,6 +13,7 @@ function PlayersScoreService.Init(self, serviceBag)
 	self._maid = Maid.new()
 	self._gunService = serviceBag:GetService(require("GunService"))
 	self._activePlayersService = serviceBag:GetService(require("ActivePlayersService"))
+	self._roundControllerService = serviceBag:GetService(require("RoundControllerService"))
 	self._remoteEvent = GetRemoteEvent(REMOTE_EVENT_NAME)
 
 	-- Public
@@ -41,14 +42,19 @@ function PlayersScoreService.Start(self)
 	end))
 	self._maid:Add(self._remoteEvent.OnServerEvent:Connect(function(player, data)
 		local filteredTable = {}
-		for player, score in self.playersScore do
-			filteredTable[player.UserId] = score
+		for otherPlayer, score in self.playersScore do
+			filteredTable[otherPlayer.UserId] = score
 		end
 		if data.message == "init" then
 			self._remoteEvent:FireClient(player, {
 				message = "init",
 				players = filteredTable,
 			})
+		end
+	end))
+	self._maid:Add(self._roundControllerService.startRound:Connect(function()
+		for key in self.playersScore do
+			self.playersScore[key] = 0
 		end
 	end))
 end

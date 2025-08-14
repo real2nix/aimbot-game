@@ -10,39 +10,61 @@ CountdownServiceUI.ServiceName = "CountdownServiceUI"
 
 local Maid = require("Maid")
 
-local ROUND_SECONDS = 4 * 60
-
 local function component(props)
 	local timeLeft, setTimeLeft = React.useState(0)
+	local roundSeconds, setRoundSeconds = React.useState(props._countdownServiceClient.roundSeconds.Value)
+
+	React.useEffect(function()
+		local maid = Maid.new()
+		maid:Add(props._countdownServiceClient.roundSeconds.Changed:Connect(function(newValue)
+			setRoundSeconds(newValue)
+		end))
+		return function()
+			maid:DoCleaning()
+		end
+	end, {})
 
 	React.useEffect(function()
 		local countdownConnection: RBXScriptConnection? = nil
-		local roundStartTimeConnection = props._countdownServiceClient.roundStartTime.Changed:Connect(
-			function(roundStartTime)
-				if roundStartTime == 0 then
-					return
-				end
-				if countdownConnection then
-					countdownConnection:Disconnect()
-				end
-				countdownConnection = RunService.Heartbeat:Connect(function()
-					local newTimeLeft = (roundStartTime + ROUND_SECONDS) - os.time()
-					if newTimeLeft ~= timeLeft then
-						setTimeLeft(newTimeLeft)
-					end
-				end)
+		local maid = Maid.new()
+
+		local function startCountdown(roundStartTime)
+			if countdownConnection then
+				countdownConnection:Disconnect()
 			end
-		)
+			if roundStartTime == 0 then
+				return
+			end
+			countdownConnection = RunService.Heartbeat:Connect(function()
+				local newTimeLeft = math.max(0, (roundStartTime + roundSeconds) - os.time())
+				setTimeLeft(newTimeLeft)
+			end)
+		end
+
+		-- Start countdown immediately if roundStartTime is already set
+		local currentRoundStartTime = props._countdownServiceClient.roundStartTime.Value
+		if currentRoundStartTime and currentRoundStartTime > 0 then
+			startCountdown(currentRoundStartTime)
+		end
+
+		-- Listen for changes to roundStartTime
+		maid:Add(props._countdownServiceClient.roundStartTime.Changed:Connect(startCountdown))
+
 		return function()
-			roundStartTimeConnection:Disconnect()
+			maid:DoCleaning()
 			if countdownConnection then
 				countdownConnection:Disconnect()
 			end
 		end
-	end, {})
+	end, { roundSeconds })
+
+	-- Format the time display, handle negative values
+	local displayTime = math.max(0, timeLeft)
+	local minutes = math.floor(displayTime / 60)
+	local seconds = displayTime % 60
 
 	return React.createElement("TextLabel", {
-		Text = string.format("%d:%02d", timeLeft // 60, timeLeft % 60),
+		Text = string.format("%d:%02d", minutes, seconds),
 		Size = UDim2.fromScale(1, 0.05),
 		Position = UDim2.new(0, 0, 0.08, 10),
 		BackgroundTransparency = 1,

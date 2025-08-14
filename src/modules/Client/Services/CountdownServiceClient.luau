@@ -14,17 +14,17 @@ function CountdownServiceClient.Init(self, serviceBag)
 
 	-- Public
 	self.roundStartTime = self._maid:Add(ValueObject.new(0))
-	self.roundSeconds = 4 * 60
+	self.roundSeconds = self._maid:Add(ValueObject.new(0))
 end
 
 function CountdownServiceClient.Start(self)
 	self._maid:Add(self._roundControllerServiceClient.newRoundSignal:Connect(function(data)
 		self.roundStartTime:SetValue(data.roundStartTime)
-		self.roundSeconds = data.roundSeconds
+		self.roundSeconds:SetValue(data.roundSeconds)
 	end))
 	self._maid:Add(self._roundControllerServiceClient.midRoundSignal:Connect(function(data)
 		self.roundStartTime:SetValue(data.roundStartTime)
-		self.roundSeconds = data.roundSeconds
+		self.roundSeconds:SetValue(data.roundSeconds)
 	end))
 end
 

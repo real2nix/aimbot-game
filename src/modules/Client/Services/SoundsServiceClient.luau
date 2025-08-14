@@ -27,6 +27,9 @@ function SoundsServiceClient.Start(self)
 	self._maid:Add(self._playerHurtServiceClient.playerHurtSignal:Connect(function()
 		SoundService:FindFirstChild("Hurt"):Play()
 	end))
+	self._maid:Add(self._gunServiceClient.shotSignal:Connect(function()
+		SoundService:FindFirstChild("Shoot"):Play()
+	end))
 end
 
 function SoundsServiceClient.Destroy(self)

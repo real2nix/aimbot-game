@@ -26,11 +26,16 @@ end
 function RoundControllerService.Start(self)
 	self._maid:Add(self.startRound:Connect(function()
 		self.roundStartTime = os.time()
+		self._remoteEvent:FireAllClients({
+			message = "newRound",
+			roundStartTime = self.roundStartTime,
+			roundSeconds = self.roundSeconds,
+		})
 		local connection: RBXScriptConnection
 		connection = RunService.Heartbeat:Connect(function()
 			if os.time() >= self.roundStartTime + self.roundSeconds then
-				self.endRound:Fire()
 				connection:Disconnect()
+				self.endRound:Fire()
 			end
 		end)
 	end))
