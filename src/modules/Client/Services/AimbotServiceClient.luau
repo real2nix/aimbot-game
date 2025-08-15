@@ -23,7 +23,7 @@ function AimbotServiceClient.Init(self, serviceBag)
 	self._params = RaycastParams.new()
 	self._params.FilterType = Enum.RaycastFilterType.Exclude
 end
-
+-- target body parts
 function AimbotServiceClient.Start(self)
 	self._maid:Add(self._gunServiceClient.state.Changed:Connect(function(value: string)
 		if value == "shooting" then

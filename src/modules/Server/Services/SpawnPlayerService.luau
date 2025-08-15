@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local require = require(script.Parent.loader).load(script)
 
 local SpawnPlayerService = {}
@@ -12,6 +13,7 @@ local RxCharacterUtils = require("RxCharacterUtils")
 
 local FORCEFIELD_SECONDS: number = 2
 local REMOTE_EVENT_NAME: string = "SpawnPlayerService"
+local IS_DEBUG = true
 
 function SpawnPlayerService.Init(self, serviceBag)
 	-- Private
@@ -71,9 +73,15 @@ function SpawnPlayerService._getPlayerSpawn(self, player)
 			score = score,
 		})
 	end
-	table.sort(spawnScores, function(a, b)
-		return a.score > b.score
-	end)
+	if RunService:IsStudio() and IS_DEBUG then
+		table.sort(spawnScores, function(a, b)
+			return a.score < b.score
+		end)
+	else
+		table.sort(spawnScores, function(a, b)
+			return a.score > b.score
+		end)
+	end
 	return spawnScores[1].spawn
 end
 
