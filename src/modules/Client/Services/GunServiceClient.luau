@@ -28,6 +28,7 @@ function GunServiceClient.Init(self, serviceBag)
 
 	self._serviceBag = serviceBag
 	self._aimbotServiceClient = serviceBag:GetService(require("AimbotServiceClient"))
+	self._deathServiceClient = serviceBag:GetService(require("DeathServiceClient"))
 	self._remoteEventPromise = PromiseGetRemoteEvent(REMOTE_EVENT_NAME)
 
 	self.state = self._maid:Add(ValueObject.new("ready", "string"))
@@ -49,6 +50,10 @@ end
 
 function GunServiceClient.Start(self)
 	self._maid:Add(UserInputService.InputBegan:Connect(function(input)
+		if self._deathServiceClient.isClientDead.Value then
+			-- Player is dead
+			return
+		end
 		if self.state.Value == "ready" then
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				self.startShootingSignal:Fire()
@@ -61,7 +66,6 @@ function GunServiceClient.Start(self)
 			end
 		end
 	end))
-
 	self._maid:Add(UserInputService.InputEnded:Connect(function(input)
 		if self.state.Value == "shooting" then
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -69,7 +73,6 @@ function GunServiceClient.Start(self)
 			end
 		end
 	end))
-
 	self._maid:Add(self.startShootingSignal:Connect(function()
 		if self.state.Value == "ready" then
 			self:_startShooting()
@@ -83,6 +86,13 @@ function GunServiceClient.Start(self)
 	self._maid:Add(self.reloadSignal:Connect(function()
 		self:_reload()
 	end))
+	self._maid:Add(self._deathServiceClient.clientDiedSignal:Connect(function()
+		if self.state.Value == "shooting" then
+			self:_stopShooting()
+		end
+		self.state:SetValue("ready")
+		self.ammo:SetValue(self.maxAmmo.Value)
+	end))
 end
 
 function GunServiceClient.Destroy(self)
@@ -91,7 +101,6 @@ end
 
 function GunServiceClient._reload(self)
 	self.state:SetValue("reloading")
-
 	Promise.delay(self.reloadSeconds.Value, function()
 		self.ammo:SetValue(self.maxAmmo.Value)
 		self.state:SetValue("ready")

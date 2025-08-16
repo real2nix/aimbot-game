@@ -26,19 +26,23 @@ function GunService.Start(self)
 	self._remoteEventPromise:Then(function(remoteEvent: RemoteEvent)
 		self._maid:Add(remoteEvent.OnServerEvent:Connect(function(player: Player, message: string, data)
 			if message == "shoot" then
-				-- Hit player has forcefield
 				if self._activePlayersService.activePlayers[data.playerHit].forcefield then
+					-- Player has forcefield
 					return
 				end
 				local playerHitRoot: Part? = CharacterUtils.getPlayerRootPart(data.playerHit)
 				if not playerHitRoot then
 					return
 				end
-				-- Verify shot
 				if (playerHitRoot.Position - data.position).Magnitude > 20 then
+					-- False data, hacker?
 					return
 				end
 				local playerHitHealth = self._activePlayersService.activePlayers[data.playerHit].health.Value
+				if playerHitHealth <= 0 then
+					-- Player already dead
+					return
+				end
 				local playerNewHitHealth = math.max(playerHitHealth - DAMAGE, 0)
 				self._activePlayersService.activePlayers[data.playerHit].health.Value = playerNewHitHealth
 

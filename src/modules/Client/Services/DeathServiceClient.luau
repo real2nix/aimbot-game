@@ -7,10 +7,7 @@ local Players = game:GetService("Players")
 
 local Maid = require("Maid")
 local Signal = require("Signal")
-local Promise = require("Promise")
 local ValueObject = require("ValueObject")
-
-local REMOTE_EVENT_NAME = "PLAYER_KILLED"
 
 function DeathServiceClient.Init(self, serviceBag)
 	-- Private
@@ -24,6 +21,7 @@ end
 function DeathServiceClient.Start(self)
 	self._maid:Add(self.clientDiedSignal:Connect(function()
 		self.isClientDead:SetValue(true)
+		print("test")
 		Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
 		Players.LocalPlayer.CameraMaxZoomDistance = 25
 		Players.LocalPlayer.CameraMinZoomDistance = 25

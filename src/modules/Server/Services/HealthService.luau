@@ -24,8 +24,13 @@ end
 function HealthService.Start(self)
 	self._maid:Add(self._gunService.playerHitSignal:Connect(function(data)
 		if self._userIdsHealMaids[data.playerHit.UserId] then
+			-- Remove old "wait" for regen to begin
 			self._userIdsHealMaids[data.playerHit.UserId]:DoCleaning()
 			self._userIdsHealMaids[data.playerHit.UserId] = nil
+		end
+		if data.playerHit:GetAttribute("health") <= 0 then
+			-- Player is already dead
+			return
 		end
 		local healMaid = Maid.new()
 		self._userIdsHealMaids[data.playerHit.UserId] = healMaid

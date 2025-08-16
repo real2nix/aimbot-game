@@ -5,6 +5,7 @@ GunModelControllerClient.ServiceName = "GunModelControllerClient"
 
 local RunService: RunService = game:GetService("RunService")
 local Players: Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService: UserInputService = game:GetService("UserInputService")
 
 local Maid = require("Maid")
@@ -16,6 +17,7 @@ function GunModelControllerClient.Init(self, serviceBag)
 	-- Private
 	self._maid = Maid.new()
 	self._gunServiceClient = serviceBag:GetService(require("GunServiceClient"))
+	self._deathServiceClient = serviceBag:GetService(require("DeathServiceClient"))
 
 	self._swayAmount = 2
 	self._swaySpeed = 5
@@ -43,20 +45,23 @@ function GunModelControllerClient.Init(self, serviceBag)
 	-- Reload animation state
 	self._reloadOffset = Vector3.new(0, 0, 0)
 	self._isReloading = false
-	self._reloadTime = self._gunServiceClient.reloadSeconds.Value -- How long the animation lasts (seconds)
 
 	-- Public
 end
 
 function GunModelControllerClient.Start(self)
-	self._gunServiceClient.gunModel.Parent = workspace.Ignore
-
 	local function onCharacterRemoving()
 		self._maid:DoCleaning()
 	end
-
 	local function onCharacterAdded()
 		self._maid:DoCleaning()
+		self._maid:Add(self._deathServiceClient.isClientDead:Observe():Subscribe(function(isDead)
+			if isDead then
+				self._gunServiceClient.gunModel.Parent = ReplicatedStorage
+			else
+				self._gunServiceClient.gunModel.Parent = workspace.Ignore
+			end
+		end))
 		self._maid:Add(CharacterPromiseUtils.promiseCharacter(Players.LocalPlayer):Then(function(character: Model)
 			self._maid:Add(self._gunServiceClient.shotSignal:Connect(function()
 				-- Apply instant recoil when shot
@@ -81,13 +86,13 @@ function GunModelControllerClient.Start(self)
 					-- Handle reload animation
 					if self._isReloading then
 						self._reloadTimer = self._reloadTimer + deltaTime
-						local halfTime = self._reloadTime / 2
+						local halfTime = self._gunServiceClient.reloadSeconds.Value / 2
 
 						if self._reloadTimer <= halfTime then
 							-- First half: move gun down
 							local t = self._reloadTimer / halfTime
 							self._reloadOffset = Vector3.new(0, -math.sin(t * math.pi / 2) * 3, 0) -- move down
-						elseif self._reloadTimer <= self._reloadTime then
+						elseif self._reloadTimer <= self._gunServiceClient.reloadSeconds.Value then
 							-- Second half: move gun back up
 							local t = (self._reloadTimer - halfTime) / halfTime
 							self._reloadOffset = Vector3.new(0, -math.sin((1 - t) * math.pi / 2) * 3, 0) -- move up
